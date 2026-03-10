@@ -86,7 +86,7 @@ export default function NekoPage() {
                         <br /><br />
                         I'm the webmistress of this website. This page is a small profile with links to my other projects and pages. I have a lot of hobbies and interests, but the ones that I want to share here are modeling, video games, and programming. I also have a soft spot for cute things.
                         <br /><br />
-                        I am a website developer by profession, and everything else I do is just hobbies for fun, I do try to keep myself busy with thing I enjoy :3
+                        I am a website developer by profession, and everything else I do is just hobbies for fun, I do try to keep myself busy with things I enjoy :3
                     </div>
                 </section>
 
