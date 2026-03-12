@@ -16,8 +16,7 @@ namespace sbjStats;
 
 public class SimpleBlackjackUploadScript : SplatoonScript
 {
-    public override Metadata Metadata { get; } = new(1, "Raya Serahill");
-
+    public override Metadata Metadata { get; } = new(2, "Raya Serahill");
     public override HashSet<uint>? ValidTerritories { get; } = [];
 
     [EzIPCEvent("OnGameFinishedEx", false)]
