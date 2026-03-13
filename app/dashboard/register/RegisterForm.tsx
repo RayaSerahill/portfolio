@@ -26,7 +26,7 @@ export default function RegisterForm() {
         <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
             <h1 className="text-xl font-semibold">Create dashboard account</h1>
             <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-                New accounts are created with the <span className="font-medium">dealer</span> role by default. You can register with email and password, or use Discord.
+                Register for SBJ Stats account with either email and password or Discord!
             </p>
 
             <a
