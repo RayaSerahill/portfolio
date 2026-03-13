@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -13,12 +13,11 @@ import {
 import { Pie, Bar } from "react-chartjs-2";
 import type { ChartOptions } from "chart.js";
 import { getBackgroundStyleCss, type StatsBackgroundStyle } from "@/lib/statsStyleShared";
-
-type DealerRow = { total: number; count: number };
-type DailyRow = { day: string; profit: number };
+import type { DailyRow, DealerRow } from "@/lib/dealerStats";
 
 type DealerStatsProps = {
-  uploaderId: string;
+  rows: DealerRow[];
+  daily: DailyRow[];
   pieChartColors: string[];
   barChartProfitColor: string;
   barChartLossColor: string;
@@ -28,8 +27,11 @@ type DealerStatsProps = {
   elementBackground: StatsBackgroundStyle;
 };
 
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
+
 export function DealerStats({
-  uploaderId,
+  rows,
+  daily,
   pieChartColors,
   barChartProfitColor,
   barChartLossColor,
@@ -38,51 +40,6 @@ export function DealerStats({
   containerBackground,
   elementBackground,
 }: DealerStatsProps) {
-  const [busy, setBusy] = useState(false);
-  const [rows, setRows] = useState<DealerRow[]>([]);
-  const [daily, setDaily] = useState<DailyRow[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [initialized, setInitialized] = useState(false);
-
-  useEffect(() => {
-    ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
-  }, []);
-
-  async function refresh(rebuild: boolean) {
-    setBusy(true);
-    setError(null);
-
-    try {
-      const url =
-        `/api/dealer-stats?uploaderId=${encodeURIComponent(uploaderId)}&days=${encodeURIComponent(String(barChartDays))}` +
-        (rebuild ? `&rebuild=1` : "");
-
-      const res = await fetch(url, { cache: "no-store" });
-      const json = await res.json();
-
-      if (!res.ok || !json?.ok) {
-        throw new Error(json?.message ?? "Failed to load dealer stats");
-      }
-
-      setRows(Array.isArray(json.rows) ? json.rows : []);
-      setDaily(Array.isArray(json.daily) ? json.daily : []);
-    } catch (e: any) {
-      setError(e?.message ?? String(e));
-    } finally {
-      setBusy(false);
-      setInitialized(true);
-    }
-  }
-
-  useEffect(() => {
-    setInitialized(false);
-    setRows([]);
-    setDaily([]);
-    setError(null);
-
-    if (uploaderId) void refresh(false);
-  }, [uploaderId, barChartDays]);
-
   const totalHands = useMemo(() => rows.reduce((acc, r) => acc + (Number(r.count) || 0), 0), [rows]);
   const containerBackgroundStyle = useMemo(() => getBackgroundStyleCss(containerBackground), [containerBackground]);
   const elementBackgroundStyle = useMemo(() => getBackgroundStyleCss(elementBackground), [elementBackground]);
@@ -154,22 +111,16 @@ export function DealerStats({
     [daily, dailyLabels, dailyBarColors]
   );
 
-  if (!initialized) {
-    return <div className="p-3 text-sm" style={{ color: fontColor }}>Loading dealer stats…</div>;
-  }
-
   return (
     <div className="my-12">
       <div className="mb-3 flex items-center justify-between">
         <div>
           <div className="text-lg font-semibold" style={{ color: fontColor }}>Dealer totals</div>
           <div className="text-sm opacity-70" style={{ color: fontColor }}>
-            {busy ? "Loading…" : `${totalHands} dealer hands`}
+            {`${totalHands} dealer hands`}
           </div>
         </div>
       </div>
-
-      {error ? <div className="mb-3 rounded-2xl border border-red-200 p-3 text-sm text-red-800" style={containerBackgroundStyle}>{error}</div> : null}
 
       {rows.length > 0 || daily.length > 0 ? (
         <div className="flex flex-col gap-6 md:flex-row md:items-start">
@@ -204,7 +155,11 @@ export function DealerStats({
             </div>
           ) : null}
         </div>
-      ) : null}
+      ) : (
+        <div className="rounded-2xl border border-black/10 p-4 text-sm" style={{ ...containerBackgroundStyle, color: fontColor }}>
+          No dealer stats yet.
+        </div>
+      )}
     </div>
   );
 }

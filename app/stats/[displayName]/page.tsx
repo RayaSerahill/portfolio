@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense, cache } from "react";
 import { ensureAuthCollections, ensureGameCollections, getDb, type UserDoc } from "@/lib/db";
 import { playerTagToParts } from "@/lib/gameIngest";
 import { DealerStats } from "./DealerStats";
+import { loadDealerStats } from "@/lib/dealerStats";
 import { getBackgroundStyleCss, getStatsFontFamily, getStatsStyleForUploader } from "@/lib/statsStyle";
 
 export const runtime = "nodejs";
@@ -73,6 +75,8 @@ export type LoadStatsDebug = {
   sampleNames: string[];
 };
 
+type StatsPageStyle = Awaited<ReturnType<typeof getStatsStyleForUploader>>;
+
 export type LoadStatsResult =
     | { ok: false }
     | { ok: false; debug: LoadStatsDebug }
@@ -92,6 +96,7 @@ export type LoadStatsResult =
   topLosers: LoadStatsPlayerRow[];
   topActive: LoadStatsPlayerRow[];
   totalPlayers: number;
+  style: StatsPageStyle;
 };
 
 
@@ -187,13 +192,47 @@ async function loadStats(displayName: string): Promise<LoadStatsResult> {
 
   const uploaderId = user._id.toHexString();
 
-  const newestGame = await games.findOne(
-    { uploaderId },
-    {
-      sort: { createdAt: -1 },
-      projection: { createdAt: 1, players: 1 },
-    }
-  );
+  const [
+    newestGame,
+    roundsHosted,
+    aliasRows,
+    row,
+    blacklistDocs,
+    style,
+  ] = await Promise.all([
+    games.findOne(
+      { uploaderId },
+      {
+        sort: { createdAt: -1 },
+        projection: { createdAt: 1, players: 1 },
+      }
+    ),
+    games.countDocuments({ uploaderId }),
+    aliases
+      .find({ createdBy: uploaderId }, { projection: { primaryTag: 1, aliasTag: 1 } })
+      .sort({ createdAt: -1 })
+      .toArray(),
+    games
+      .aggregate<{
+        totalProfit: number;
+        totalBet: number;
+        totalPayout: number;
+      }>([
+        { $match: { uploaderId } },
+        {
+          $group: {
+            _id: null,
+            totalProfit: { $sum: { $ifNull: ["$profit", 0] } },
+            totalBet: { $sum: { $ifNull: ["$collected", 0] } },
+            totalPayout: { $sum: { $ifNull: ["$paidOut", 0] } },
+          },
+        },
+        { $project: { _id: 0, totalProfit: 1, totalBet: 1, totalPayout: 1 } },
+      ])
+      .next(),
+    blacklist.find<{ playerTag: string; createdBy: string }>({ createdBy: uploaderId }).project({ playerTag: 1 }).toArray(),
+    getStatsStyleForUploader(uploaderId, db),
+  ]);
 
   const newestHostTag = (() => {
     const ps: any[] = Array.isArray((newestGame as any)?.players) ? (newestGame as any).players : [];
@@ -201,12 +240,6 @@ async function loadStats(displayName: string): Promise<LoadStatsResult> {
     return typeof d?.playerTag === "string" && d.playerTag.trim() ? d.playerTag.trim() : "";
   })();
 
-  const roundsHosted = await games.countDocuments({ uploaderId });
-
-  const aliasRows = await aliases
-    .find({ createdBy: uploaderId }, { projection: { primaryTag: 1, aliasTag: 1 } })
-    .sort({ createdAt: -1 })
-    .toArray();
 
   const aliasToPrimary = new Map<string, string>();
   for (const r of aliasRows as any[]) {
@@ -311,25 +344,6 @@ async function loadStats(displayName: string): Promise<LoadStatsResult> {
     }
   }
 
-  const row = await games
-      .aggregate<{
-        totalProfit: number;
-        totalBet: number;
-        totalPayout: number;
-      }>([
-        { $match: { uploaderId } },
-        {
-          $group: {
-            _id: null,
-            totalProfit: { $sum: { $ifNull: ["$profit", 0] } },
-            totalBet: { $sum: { $ifNull: ["$collected", 0] } },
-            totalPayout: { $sum: { $ifNull: ["$paidOut", 0] } },
-          },
-        },
-        { $project: { _id: 0, totalProfit: 1, totalBet: 1, totalPayout: 1 } },
-      ])
-      .next();
-
   const totals = row ?? { totalProfit: 0, totalBet: 0, totalPayout: 0 };
 
   const mergedPlayers = Array.from(byCanonical.values());
@@ -338,17 +352,9 @@ async function loadStats(displayName: string): Promise<LoadStatsResult> {
   const playerNet = totalPayout - totalBet;
   const dealerNet = totals.totalProfit;
 
-  type BlacklistDoc = { playerTag: string; createdBy: string };
-
-  const blacklistDocs = await blacklist
-      .find<BlacklistDoc>({ createdBy: uploaderId })
-      .project({ playerTag: 1 })
-      .toArray();
-
   const blacklistedTagsForUploader = new Set(blacklistDocs.map((b) => norm(b.playerTag)));
-
-  const style = await getStatsStyleForUploader(uploaderId, db);
   const styleCount = style.leaderboardSize;
+
 
   const topWinners = mergedPlayers
       .filter((p) => p.net > 0 && !blacklistedTagsForUploader.has(norm(p.playerTag ?? "")))
@@ -388,9 +394,13 @@ async function loadStats(displayName: string): Promise<LoadStatsResult> {
     topLosers,
     topActive,
     totalPlayers: mergedPlayers.length,
+    style,
   };
 
 }
+
+const loadStatsCached = cache(loadStats);
+
 
 export async function generateMetadata({
                                          params,
@@ -399,12 +409,48 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { displayName } = await params;
 
-  const result = await loadStats(displayName);
+  const result = await loadStatsCached(displayName);
   if (!result.ok) return { title: "Stats" };
 
   const data = result;
   const title = `${data.displayName} | Stats`;
   return { title };
+}
+
+async function DealerStatsSection({
+  uploaderId,
+  pieChartColors,
+  barChartProfitColor,
+  barChartLossColor,
+  barChartDays,
+  fontColor,
+  containerBackground,
+  elementBackground,
+}: {
+  uploaderId: string;
+  pieChartColors: string[];
+  barChartProfitColor: string;
+  barChartLossColor: string;
+  barChartDays: number;
+  fontColor: string;
+  containerBackground: StatsPageStyle["containerBackground"];
+  elementBackground: StatsPageStyle["elementBackground"];
+}) {
+  const dealerData = await loadDealerStats(uploaderId, barChartDays);
+
+  return (
+    <DealerStats
+      rows={dealerData.rows}
+      daily={dealerData.daily}
+      pieChartColors={pieChartColors}
+      barChartProfitColor={barChartProfitColor}
+      barChartLossColor={barChartLossColor}
+      barChartDays={barChartDays}
+      fontColor={fontColor}
+      containerBackground={containerBackground}
+      elementBackground={elementBackground}
+    />
+  );
 }
 
 export default async function DealerStatsPage({
@@ -413,7 +459,7 @@ export default async function DealerStatsPage({
   params: Promise<{ displayName: string }>;
 }) {
   const { displayName } = await params;
-  const result = await loadStats(displayName);
+  const result = await loadStatsCached(displayName);
   if (!result.ok) {
     const dbg = (result as any).debug;
     return (
@@ -440,14 +486,12 @@ export default async function DealerStatsPage({
   }
 
   const data = result;
-  const style = await getStatsStyleForUploader(data.uploaderId);
+  const style = data.style;
   const fontFamily = getStatsFontFamily(style.fontStyle);
   const pageBackgroundStyle = getBackgroundStyleCss(style.background);
   const containerBackgroundStyle = getBackgroundStyleCss(style.containerBackground);
   const elementBackgroundStyle = getBackgroundStyleCss(style.elementBackground);
   const title = data.displayName;
-  console.log(data);
-
   return (
     <div className="min-h-screen w-full px-4 py-10" style={{ ...pageBackgroundStyle, color: style.fontColor, fontFamily }}>
       <div className="mx-auto w-full max-w-5xl rounded-3xl border border-black/10 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.18)]" style={containerBackgroundStyle}>
@@ -568,7 +612,14 @@ export default async function DealerStatsPage({
             </div>
 
             {data.uploaderId ? (
-                <DealerStats
+              <Suspense
+                fallback={(
+                  <div className="mt-6 rounded-2xl border border-black/10 p-4 text-sm" style={{ ...elementBackgroundStyle, color: style.fontColor }}>
+                    Loading dealer stats…
+                  </div>
+                )}
+              >
+                <DealerStatsSection
                   uploaderId={data.uploaderId}
                   pieChartColors={style.pieChartColors}
                   barChartProfitColor={style.barChartProfitColor}
@@ -578,6 +629,7 @@ export default async function DealerStatsPage({
                   containerBackground={style.containerBackground}
                   elementBackground={style.elementBackground}
                 />
+              </Suspense>
             ) : (
                 <div className="mt-6 rounded-2xl border border-black/10 p-4 text-sm" style={{ ...elementBackgroundStyle, color: style.fontColor }}>
                   Could not resolve uploader ID for this display name.
