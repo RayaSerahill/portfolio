@@ -2,19 +2,20 @@
 
 import { useMemo, useState } from "react";
 
-type AdminSection = "aliases" | "hidden-players" | "api-keys" | null;
+type AdminSection = "aliases" | "hidden-players" | "api-keys" | "stats-style" | null;
 
 export function AdminSectionsClient({
   gameImport,
   aliases,
   hiddenPlayers,
   apiKeys,
+  statsStyle,
 }: {
-  userLabel: string;
   gameImport: React.ReactNode;
   aliases: React.ReactNode;
   hiddenPlayers: React.ReactNode;
   apiKeys: React.ReactNode;
+  statsStyle: React.ReactNode;
 }) {
   const [activeSection, setActiveSection] = useState<AdminSection>(null);
 
@@ -24,6 +25,7 @@ export function AdminSectionsClient({
       { id: "aliases" as const, label: "Aliases" },
       { id: "hidden-players" as const, label: "Hidden Players" },
       { id: "api-keys" as const, label: "API Keys" },
+      { id: "stats-style" as const, label: "Stats Style" },
     ],
     []
   );
@@ -82,6 +84,10 @@ export function AdminSectionsClient({
 
         <section id="api-keys" className={["mt-6 scroll-mt-28", activeSection === "api-keys" ? "" : "lg:hidden"].join(" ")}>
           {apiKeys}
+        </section>
+
+        <section id="stats-style" className={["mt-6 scroll-mt-28", activeSection === "stats-style" ? "" : "lg:hidden"].join(" ")}>
+          {statsStyle}
         </section>
       </main>
     </div>

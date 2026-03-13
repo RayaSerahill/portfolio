@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { ensureAuthCollections, ensureGameCollections, getDb, type UserDoc } from "@/lib/db";
 import { playerTagToParts } from "@/lib/gameIngest";
 import { DealerStats } from "./DealerStats";
-import {LogoutButton} from "@/app/admin/LogoutButton";
+import { getBackgroundStyleCss, getStatsFontFamily, getStatsStyleForUploader } from "@/lib/statsStyle";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-let uID;
 function escapeRegex(input: string) {
   return input.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -81,7 +79,8 @@ export type LoadStatsResult =
     | {
   ok: true;
   displayName: string;
-  newestHostTag: string; // your code returns "" when missing
+  uploaderId: string;
+  newestHostTag: string;
   roundsHosted: number;
   totalNet: number;
   dealerNet: number;
@@ -102,7 +101,6 @@ async function loadStats(displayName: string): Promise<LoadStatsResult> {
   const users = db.collection<UserDoc>("users");
   const games = db.collection("games");
   const aliases = db.collection("aliases");
-  const hosts = db.collection("stats_host");
   const blacklist = db.collection("blacklist");
 
   let dn = (displayName ?? "").trim();
@@ -182,7 +180,6 @@ async function loadStats(displayName: string): Promise<LoadStatsResult> {
   }
 
   const uploaderId = user._id.toHexString();
-  uID = uploaderId;
 
   const newestGame = await games.findOne(
     { uploaderId },
@@ -328,7 +325,6 @@ async function loadStats(displayName: string): Promise<LoadStatsResult> {
       .next();
 
   const totals = row ?? { totalProfit: 0, totalBet: 0, totalPayout: 0 };
-  console.log("[stats] totals:", totals);
 
   const mergedPlayers = Array.from(byCanonical.values());
   const totalBet = totals.totalBet;
@@ -345,35 +341,35 @@ async function loadStats(displayName: string): Promise<LoadStatsResult> {
 
   const blacklistedTagsForUploader = new Set(blacklistDocs.map((b) => norm(b.playerTag)));
 
+  const style = await getStatsStyleForUploader(uploaderId, db);
+  const styleCount = style.leaderboardSize;
+
   const topWinners = mergedPlayers
       .filter((p) => p.net > 0 && !blacklistedTagsForUploader.has(norm(p.playerTag ?? "")))
       .sort((a, b) => b.net - a.net)
-      .slice(0, 20);
+      .slice(0, styleCount);
 
   const topLosers = mergedPlayers
       .filter((p) => p.net < 0 && !blacklistedTagsForUploader.has(norm(p.playerTag ?? "")))
     .sort((a, b) => a.net - b.net)
-    .slice(0, 20);
+    .slice(0, styleCount);
 
   const topActive = mergedPlayers
     .filter(p => !blacklistedTagsForUploader.has(norm(p.playerTag ?? "")))
     .slice()
     .sort((a, b) => b.games - a.games || b.betTotal - a.betTotal)
-    .slice(0, 20);
+    .slice(0, styleCount);
 
   const totalNet = mergedPlayers.reduce(
       (sum, p) => sum + ((Number(p.payoutTotal) || 0) - (Number(p.betTotal) || 0)),
       0,
   );
 
-  console.log("[stats] topWinners:", topWinners);
-  console.log("[stats] topLosers:", topLosers);
-  console.log("[stats] topActive:", topActive);
-
 
   return {
     ok: true as const,
     displayName: user.name ?? displayName,
+    uploaderId,
     newestHostTag,
     roundsHosted,
     totalNet,
@@ -403,38 +399,13 @@ export async function generateMetadata({
   return { title };
 }
 
-// get id with displayName
-function getIdFromDisplayName(displayName: string): Promise<string | null> {
-  return new Promise(async (resolve) => {
-    await ensureAuthCollections();
-    const db = await getDb();
-    const users = db.collection<UserDoc>("users");
-
-    const user = await users.findOne(
-        { name: displayName },
-        { collation: { locale: "en", strength: 2 }, projection: { _id: 1 } }
-    );
-
-    if (user?._id) {
-      resolve(user._id.toHexString());
-    } else {
-      resolve(null);
-    }
-  });
-}
-
 export default async function DealerStatsPage({
                                                 params,
                                               }: {
   params: Promise<{ displayName: string }>;
 }) {
   const { displayName } = await params;
-  const uploaderID = await getIdFromDisplayName(displayName);
-
   const result = await loadStats(displayName);
-  console.log("[stats] displayName:", displayName);
-  console.dir(result, { depth: 6 });
-
   if (!result.ok) {
     const dbg = (result as any).debug;
     return (
@@ -449,7 +420,7 @@ export default async function DealerStatsPage({
               <div className="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-xs text-zinc-800">
                 <div><span className="font-semibold">DB:</span> {String(dbg.db)}</div>
                 <div className="mt-2"><span className="font-semibold">Sample user names:</span></div>
-                <div className="mt-1">{String(dbg.sampleUserNames ?? [])}</div>
+                <div className="mt-1">{String(dbg.sampleNames ?? [])}</div>
               </div>
           ) : (
               <div className="mt-4 rounded-2xl border border-zinc-200 bg-zinc-50 p-4 text-xs text-zinc-800">
@@ -461,6 +432,11 @@ export default async function DealerStatsPage({
   }
 
   const data = result;
+  const style = await getStatsStyleForUploader(data.uploaderId);
+  const fontFamily = getStatsFontFamily(style.fontStyle);
+  const pageBackgroundStyle = getBackgroundStyleCss(style.background);
+  const containerBackgroundStyle = getBackgroundStyleCss(style.containerBackground);
+  const elementBackgroundStyle = getBackgroundStyleCss(style.elementBackground);
   let title = data.newestHostTag || data.displayName;
 
   if (title === "Lini White@Alpha") {
@@ -468,12 +444,12 @@ export default async function DealerStatsPage({
   }
 
   return (
-    <div className="mx-auto min-h-screen w-full max-w-5xl px-4 py-10">
-      <div className="rounded-3xl border border-[#FF9FC6]/35 bg-gradient-to-b from-white to-[#FF9FC6]/90 p-6 shadow-[0_0_0_1px_rgba(255,159,198,0.18),0_18px_60px_rgba(255,159,198,0.22)]">
+    <div className="min-h-screen w-full px-4 py-10" style={{ ...pageBackgroundStyle, color: style.fontColor, fontFamily }}>
+      <div className="mx-auto w-full max-w-5xl rounded-3xl border border-black/10 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.18)]" style={containerBackgroundStyle}>
         <div className="flex flex-col gap-2">
-          <h1 className="text-2xl font-semibold text-zinc-900">{title}</h1>
-          <p className="text-sm text-zinc-700">
-            Stats for uploader <span className="font-medium text-zinc-900">{data.displayName}</span>
+          <h1 className="text-2xl font-semibold" style={{ color: style.fontColor }}>{title}</h1>
+          <p className="text-sm" style={{ color: style.fontColor }}>
+            Stats for uploader <span className="font-medium" style={{ color: style.fontColor }}>{data.displayName}</span>
             {data.totalPlayers ? (
               <>
                 {" "}• {fmtInt(data.totalPlayers)} players
@@ -483,31 +459,31 @@ export default async function DealerStatsPage({
         </div>
 
         {data.roundsHosted === 0 ? (
-          <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-4 text-sm text-zinc-700">
+          <div className="mt-6 rounded-2xl border border-black/10 p-4 text-sm" style={{ ...containerBackgroundStyle, color: style.fontColor }}>
             No rounds uploaded yet.
           </div>
         ) : (
           <>
             <div className="mt-6 grid gap-4 sm:grid-cols-3">
-              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-                <div className="text-xs font-medium text-zinc-500">Rounds hosted</div>
-                <div className="mt-2 text-2xl font-semibold text-zinc-900">{fmtInt(data.roundsHosted)}</div>
+              <div className="rounded-2xl border border-black/10 p-4 shadow-sm" style={elementBackgroundStyle}>
+                <div className="text-xs font-medium opacity-70" style={{ color: style.fontColor }}>Rounds hosted</div>
+                <div className="mt-2 text-2xl font-semibold" style={{ color: style.fontColor }}>{fmtInt(data.roundsHosted)}</div>
               </div>
-              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-                <div className="text-xs font-medium text-zinc-500">Profit / loss (dealer)</div>
-                <div className="mt-2 text-2xl font-semibold text-zinc-900">{fmtMoney(data.dealerNet)}</div>
-                <div className="mt-1 text-xs text-zinc-500">Players net: {fmtMoney(data.playerNet)}</div>
+              <div className="rounded-2xl border border-black/10 p-4 shadow-sm" style={elementBackgroundStyle}>
+                <div className="text-xs font-medium opacity-70" style={{ color: style.fontColor }}>Profit / loss (dealer)</div>
+                <div className="mt-2 text-2xl font-semibold" style={{ color: style.fontColor }}>{fmtMoney(data.dealerNet)}</div>
+                <div className="mt-1 text-xs opacity-70" style={{ color: style.fontColor }}>Players net: {fmtMoney(data.playerNet)}</div>
               </div>
-              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
-                <div className="text-xs font-medium text-zinc-500">Volume</div>
-                <div className="mt-2 text-sm text-zinc-800">
+              <div className="rounded-2xl border border-black/10 p-4 shadow-sm" style={elementBackgroundStyle}>
+                <div className="text-xs font-medium opacity-70" style={{ color: style.fontColor }}>Volume</div>
+                <div className="mt-2 text-sm" style={{ color: style.fontColor }}>
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-zinc-600">Total bet</span>
-                    <span className="font-medium text-zinc-900">{fmtInt(data.totalBet)}</span>
+                    <span style={{ color: style.fontColor, opacity: 0.75 }}>Total bet</span>
+                    <span className="font-medium" style={{ color: style.fontColor }}>{fmtInt(data.totalBet)}</span>
                   </div>
                   <div className="mt-2 flex items-center justify-between gap-3">
-                    <span className="text-zinc-600">Total payout</span>
-                    <span className="font-medium text-zinc-900">{fmtInt(data.totalPayout)}</span>
+                    <span style={{ color: style.fontColor, opacity: 0.75 }}>Total payout</span>
+                    <span className="font-medium" style={{ color: style.fontColor }}>{fmtInt(data.totalPayout)}</span>
                   </div>
                 </div>
               </div>
@@ -515,83 +491,92 @@ export default async function DealerStatsPage({
 
 
             <div className="mt-6 grid gap-4 lg:grid-cols-3">
-              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+              <div className="rounded-2xl border border-black/10 p-4 shadow-sm" style={elementBackgroundStyle}>
                 <div className="flex items-center justify-between">
-                  <h2 className="text-sm font-semibold text-zinc-900">Top 10 winners</h2>
-                  <span className="text-xs text-zinc-500">by net</span>
+                  <h2 className="text-sm font-semibold" style={{ color: style.fontColor }}>Top {style.leaderboardSize} winners</h2>
+                  <span className="text-xs" style={{ color: style.fontColor, opacity: 0.7 }}>by net</span>
                 </div>
-                <ol className="mt-3 space-y-2 text-sm">
+                <ol className="mt-3 space-y-2 text-sm" style={{ color: style.fontColor }}>
                   {data.topWinners.length ? (
                       data.topWinners.map((p, idx) => (
                           <li key={p.name} className="flex items-center justify-between gap-3">
-                        <span className="truncate text-zinc-800">
-                          <span className="mr-2 text-xs text-zinc-500">#{idx + 1}</span>
-                          <span className="font-medium text-zinc-900">{p.playerTag}</span>
+                        <span className="truncate" style={{ color: style.fontColor }}>
+                          <span className="mr-2 text-xs" style={{ color: style.fontColor, opacity: 0.7 }}>#{idx + 1}</span>
+                          <span className="font-medium" style={{ color: style.fontColor }}>{p.playerTag}</span>
                         </span>
-                            <span className="shrink-0 font-medium text-zinc-900">{fmtMoney(p.net)}</span>
+                            <span className="shrink-0 font-medium" style={{ color: style.fontColor }}>{fmtMoney(p.net)}</span>
                           </li>
                       ))
                   ) : (
-                      <li className="text-zinc-600">No winners yet.</li>
+                      <li style={{ color: style.fontColor, opacity: 0.75 }}>No winners yet.</li>
                   )}
                 </ol>
               </div>
 
-              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+              <div className="rounded-2xl border border-black/10 p-4 shadow-sm" style={elementBackgroundStyle}>
                 <div className="flex items-center justify-between">
-                  <h2 className="text-sm font-semibold text-zinc-900">Top 10 losers</h2>
-                  <span className="text-xs text-zinc-500">by net</span>
+                  <h2 className="text-sm font-semibold" style={{ color: style.fontColor }}>Top {style.leaderboardSize} losers</h2>
+                  <span className="text-xs" style={{ color: style.fontColor, opacity: 0.7 }}>by net</span>
                 </div>
-                <ol className="mt-3 space-y-2 text-sm">
+                <ol className="mt-3 space-y-2 text-sm" style={{ color: style.fontColor }}>
                   {data.topLosers.length ? (
                       data.topLosers.map((p, idx) => (
                           <li key={p.name} className="flex items-center justify-between gap-3">
-                        <span className="truncate text-zinc-800">
-                          <span className="mr-2 text-xs text-zinc-500">#{idx + 1}</span>
-                          <span className="font-medium text-zinc-900">{p.playerTag}</span>
+                        <span className="truncate" style={{ color: style.fontColor }}>
+                          <span className="mr-2 text-xs" style={{ color: style.fontColor, opacity: 0.7 }}>#{idx + 1}</span>
+                          <span className="font-medium" style={{ color: style.fontColor }}>{p.playerTag}</span>
                         </span>
-                            <span className="shrink-0 font-medium text-zinc-900">{fmtMoney(p.net)}</span>
+                            <span className="shrink-0 font-medium" style={{ color: style.fontColor }}>{fmtMoney(p.net)}</span>
                           </li>
                       ))
                   ) : (
-                      <li className="text-zinc-600">No losers yet.</li>
+                      <li style={{ color: style.fontColor, opacity: 0.75 }}>No losers yet.</li>
                   )}
                 </ol>
               </div>
 
-              <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm">
+              <div className="rounded-2xl border border-black/10 p-4 shadow-sm" style={elementBackgroundStyle}>
                 <div className="flex items-center justify-between">
-                  <h2 className="text-sm font-semibold text-zinc-900">Top 10 most active</h2>
-                  <span className="text-xs text-zinc-500">by games</span>
+                  <h2 className="text-sm font-semibold" style={{ color: style.fontColor }}>Top {style.leaderboardSize} most active</h2>
+                  <span className="text-xs" style={{ color: style.fontColor, opacity: 0.7 }}>by games</span>
                 </div>
-                <ol className="mt-3 space-y-2 text-sm">
+                <ol className="mt-3 space-y-2 text-sm" style={{ color: style.fontColor }}>
                   {data.topActive.length ? (
                       data.topActive.map((p, idx) => (
                           <li key={p.name} className="flex items-center justify-between gap-3">
-                        <span className="truncate text-zinc-800">
-                          <span className="mr-2 text-xs text-zinc-500">#{idx + 1}</span>
-                          <span className="font-medium text-zinc-900">{p.playerTag}</span>
+                        <span className="truncate" style={{ color: style.fontColor }}>
+                          <span className="mr-2 text-xs" style={{ color: style.fontColor, opacity: 0.7 }}>#{idx + 1}</span>
+                          <span className="font-medium" style={{ color: style.fontColor }}>{p.playerTag}</span>
                         </span>
-                            <span className="shrink-0 font-medium text-zinc-900">{fmtInt(p.games)}</span>
+                            <span className="shrink-0 font-medium" style={{ color: style.fontColor }}>{fmtInt(p.games)}</span>
                           </li>
                       ))
                   ) : (
-                      <li className="text-zinc-600">No players yet.</li>
+                      <li style={{ color: style.fontColor, opacity: 0.75 }}>No players yet.</li>
                   )}
                 </ol>
               </div>
             </div>
 
-            {uploaderID ? (
-                <DealerStats uploaderId={uploaderID}/>
+            {data.uploaderId ? (
+                <DealerStats
+                  uploaderId={data.uploaderId}
+                  pieChartColors={style.pieChartColors}
+                  barChartProfitColor={style.barChartProfitColor}
+                  barChartLossColor={style.barChartLossColor}
+                  barChartDays={style.barChartDays}
+                  fontColor={style.fontColor}
+                  containerBackground={style.containerBackground}
+                  elementBackground={style.elementBackground}
+                />
             ) : (
-                <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-4 text-sm text-zinc-700">
+                <div className="mt-6 rounded-2xl border border-black/10 p-4 text-sm" style={{ ...elementBackgroundStyle, color: style.fontColor }}>
                   Could not resolve uploader ID for this display name.
                 </div>
             )}
 
 
-            <div className="mt-6 rounded-2xl border border-[#FF9FC6]/35 bg-white/80 p-4 text-xs text-zinc-700 shadow-[0_0_0_1px_rgba(255,159,198,0.10)]">
+            <div className="mt-6 rounded-2xl border border-black/10 p-4 text-xs shadow-[0_0_0_1px_rgba(0,0,0,0.04)]" style={{ ...elementBackgroundStyle, color: style.fontColor }}>
               Stats are usually updated after each hosting session.
             </div>
           </>

@@ -9,6 +9,7 @@ import { Aliases } from "./Aliases";
 import { HiddenPlayers } from "./HiddenPlayers";
 import { ApiKeys } from "./ApiKeys";
 import { AdminSectionsClient } from "./AdminSectionsClient";
+import { StatsStyleEditor } from "./StatsStyleEditor";
 
 export default async function AdminPage() {
   await ensureAuthCollections();
@@ -38,11 +39,11 @@ export default async function AdminPage() {
         </div>
 
         <AdminSectionsClient
-          userLabel={user?.name ?? auth.email}
           gameImport={<GameImport />}
           aliases={<Aliases />}
           hiddenPlayers={<HiddenPlayers />}
           apiKeys={<ApiKeys />}
+          statsStyle={<StatsStyleEditor />}
         />
       </div>
     </div>

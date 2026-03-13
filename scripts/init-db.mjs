@@ -78,6 +78,10 @@ const run = async () => {
   await statsCombo.createIndex({ uploaderId: 1, updatedAt: -1 });
   await statsCombo.createIndex({ uploaderId: 1, seen: -1 });
 
+  const statsStyles = db.collection("stats_styles");
+  await statsStyles.createIndex({ uploaderId: 1 }, { unique: true });
+  await statsStyles.createIndex({ updatedAt: -1 });
+
   const books = db.collection("books");
   await books.createIndex(
     { uploaderId: 1, key: 1 },
@@ -96,7 +100,7 @@ const run = async () => {
   await books.createIndex({ uploaderId: 1, author: 1 });
   await books.createIndex({ uploaderId: 1, additionalTags: 1 }, { sparse: true });
 
-  console.log(`OK: indexes ready in db "${dbName}" (users, games, players, aliases, blacklist, stats_*, books)`);
+  console.log(`OK: indexes ready in db "${dbName}" (users, games, players, aliases, blacklist, stats_*, stats_styles, books)`);
 };
 
 run()

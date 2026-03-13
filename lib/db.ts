@@ -63,6 +63,7 @@ export async function ensureGameCollections() {
       await ensureCollection(db, "stats_player");
       await ensureCollection(db, "stats_host");
       await ensureCollection(db, "stats_combo");
+      await ensureCollection(db, "stats_styles");
 
       const players = db.collection("players");
       await players.createIndex({ playerTag: 1 }, { unique: true });
@@ -122,6 +123,10 @@ export async function ensureGameCollections() {
       );
       await statsCombo.createIndex({ uploaderId: 1, updatedAt: -1 });
       await statsCombo.createIndex({ uploaderId: 1, seen: -1 });
+
+      const statsStyles = db.collection("stats_styles");
+      await statsStyles.createIndex({ uploaderId: 1 }, { unique: true });
+      await statsStyles.createIndex({ updatedAt: -1 });
     })();
   }
 
