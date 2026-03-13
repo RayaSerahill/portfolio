@@ -9,6 +9,7 @@ export type UserDoc = {
   passwordHash: string;
   name?: string;
   username?: string;
+  discord?: string;
   role: UserRole;
   apiKeyHash?: string;
   apiKeyPrefix?: string;
@@ -40,6 +41,7 @@ export async function ensureAuthCollections() {
       const users = db.collection<UserDoc>("users");
       await users.createIndex({ email: 1 }, { unique: true });
       await users.createIndex({ username: 1 }, { unique: true, sparse: true });
+      await users.createIndex({ discord: 1 }, { unique: true, sparse: true });
       await users.createIndex({ role: 1, createdAt: -1 });
       await users.createIndex({ createdAt: 1 });
       await users.createIndex({ deleted: 1, updatedAt: -1 }, { sparse: true });

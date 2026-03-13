@@ -1,9 +1,11 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { AUTH_COOKIE_NAME, authCookieOptions, signAuthToken } from "@/lib/auth";
+import { ObjectId } from "mongodb";
+import { AUTH_COOKIE_NAME, authCookieOptions, signAuthToken, verifyAuthToken } from "@/lib/auth";
 import { ensureAuthCollections, getDb, type UserDoc, type UserRole } from "@/lib/db";
 
 const STATE_COOKIE = "discord_oauth_state";
+const MODE_COOKIE = "discord_oauth_mode";
 
 type DiscordTokenResponse = {
   access_token?: string;
@@ -22,6 +24,19 @@ function getBaseUrl(req: Request) {
   return `${url.protocol}//${url.host}`;
 }
 
+function clearOauthCookies(res: NextResponse) {
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax" as const,
+    path: "/",
+    maxAge: 0,
+  };
+  res.cookies.set(STATE_COOKIE, "", cookieOptions);
+  res.cookies.set(MODE_COOKIE, "", cookieOptions);
+  return res;
+}
+
 export async function GET(req: Request) {
   await ensureAuthCollections();
 
@@ -32,19 +47,26 @@ export async function GET(req: Request) {
   const baseUrl = getBaseUrl(req);
 
   if (error) {
-    return NextResponse.redirect(new URL(`/dashboard/register?error=${encodeURIComponent("Discord sign-in was cancelled")}`, baseUrl));
+    return clearOauthCookies(NextResponse.redirect(new URL(`/dashboard/register?error=${encodeURIComponent("Discord sign-in was cancelled")}`, baseUrl)));
   }
 
   const cookieStore = await cookies();
   const expectedState = cookieStore.get(STATE_COOKIE)?.value ?? "";
+  const mode = cookieStore.get(MODE_COOKIE)?.value === "connect" ? "connect" : "login";
   if (!code || !state || !expectedState || state !== expectedState) {
-    return NextResponse.redirect(new URL(`/dashboard/register?error=${encodeURIComponent("Discord sign-in could not be verified")}`, baseUrl));
+    const target = mode === "connect"
+      ? `/dashboard?error=${encodeURIComponent("Discord sign-in could not be verified")}`
+      : `/dashboard/register?error=${encodeURIComponent("Discord sign-in could not be verified")}`;
+    return clearOauthCookies(NextResponse.redirect(new URL(target, baseUrl)));
   }
 
   const clientId = process.env.DISCORD_CLIENT_ID;
   const clientSecret = process.env.DISCORD_CLIENT_SECRET;
   if (!clientId || !clientSecret) {
-    return NextResponse.redirect(new URL(`/dashboard/register?error=${encodeURIComponent("Discord auth is not configured")}`, baseUrl));
+    const target = mode === "connect"
+      ? `/dashboard?error=${encodeURIComponent("Discord auth is not configured")}`
+      : `/dashboard/register?error=${encodeURIComponent("Discord auth is not configured")}`;
+    return clearOauthCookies(NextResponse.redirect(new URL(target, baseUrl)));
   }
 
   const redirectUri = `${baseUrl}/api/auth/discord/callback`;
@@ -81,17 +103,58 @@ export async function GET(req: Request) {
     }
 
     const discordUser = (await userRes.json()) as DiscordUserResponse;
+    const discordId = (discordUser.id ?? "").trim();
     const email = (discordUser.email ?? "").trim().toLowerCase();
     const usernameFromDiscord = (discordUser.username ?? "").trim();
-    const name = usernameFromDiscord || (discordUser.global_name ?? "").trim();
+    const globalName = (discordUser.global_name ?? "").trim();
+    const name = globalName || usernameFromDiscord;
 
-    if (!email) {
-      throw new Error("Discord did not return an email address");
+    if (!discordId) {
+      throw new Error("Discord did not return a user id");
     }
 
     const db = await getDb();
     const users = db.collection<UserDoc>("users");
-    const existing = await users.findOne({ email, deleted: { $ne: true } });
+
+    if (mode === "connect") {
+      const authToken = cookieStore.get(AUTH_COOKIE_NAME)?.value ?? "";
+      if (!authToken) {
+        return clearOauthCookies(NextResponse.redirect(new URL(`/dashboard/login?error=${encodeURIComponent("Please sign in before connecting Discord")}`, baseUrl)));
+      }
+
+      const auth = await verifyAuthToken(authToken).catch(() => null);
+      if (!auth?.id) {
+        return clearOauthCookies(NextResponse.redirect(new URL(`/dashboard/login?error=${encodeURIComponent("Please sign in before connecting Discord")}`, baseUrl)));
+      }
+
+      const currentUserId = new ObjectId(auth.id);
+      const currentUser = await users.findOne({ _id: currentUserId, deleted: { $ne: true } });
+      if (!currentUser) {
+        return clearOauthCookies(NextResponse.redirect(new URL(`/dashboard/login?error=${encodeURIComponent("Account not available")}`, baseUrl)));
+      }
+
+      const linkedElsewhere = await users.findOne({ discord: discordId, _id: { $ne: currentUserId }, deleted: { $ne: true } }, { projection: { _id: 1 } });
+      if (linkedElsewhere?._id) {
+        return clearOauthCookies(NextResponse.redirect(new URL(`/dashboard?error=${encodeURIComponent("That Discord account is already connected to another user")}`, baseUrl)));
+      }
+
+      await users.updateOne(
+        { _id: currentUserId },
+        {
+          $set: {
+            discord: discordId,
+            updatedAt: new Date(),
+          },
+        }
+      );
+
+      return clearOauthCookies(NextResponse.redirect(new URL(`/dashboard?success=${encodeURIComponent("Discord account connected")}`, baseUrl)));
+    }
+
+    let existing = await users.findOne({ discord: discordId, deleted: { $ne: true } });
+    if (!existing && email) {
+      existing = await users.findOne({ email, deleted: { $ne: true } });
+    }
 
     let id = "";
     let role: UserRole = "dealer";
@@ -103,12 +166,16 @@ export async function GET(req: Request) {
         { _id: existing._id },
         {
           $set: {
+            discord: existing.discord || discordId,
             name: existing.name || name || undefined,
             updatedAt: new Date(),
           },
         }
       );
     } else {
+      if (!email) {
+        throw new Error("Discord did not return an email address");
+      }
       const existingCount = await users.countDocuments({}, { limit: 2 });
       role = existingCount === 0 ? "owner" : "dealer";
       const now = new Date();
@@ -117,6 +184,7 @@ export async function GET(req: Request) {
         passwordHash: "",
         name: name || undefined,
         username: undefined,
+        discord: discordId,
         role,
         deleted: false,
         createdAt: now,
@@ -125,14 +193,14 @@ export async function GET(req: Request) {
       id = insert.insertedId.toHexString();
     }
 
-    const token = await signAuthToken({ id, email, role });
+    const token = await signAuthToken({ id, email: existing?.email ?? email, role });
     const res = NextResponse.redirect(new URL("/dashboard", baseUrl));
     res.cookies.set(AUTH_COOKIE_NAME, token, authCookieOptions());
-    res.cookies.set(STATE_COOKIE, "", { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 0 });
-    return res;
+    return clearOauthCookies(res);
   } catch {
-    const res = NextResponse.redirect(new URL(`/dashboard/register?error=${encodeURIComponent("Discord sign-in failed")}`, baseUrl));
-    res.cookies.set(STATE_COOKIE, "", { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", path: "/", maxAge: 0 });
-    return res;
+    const target = mode === "connect"
+      ? `/dashboard?error=${encodeURIComponent("Discord connection failed")}`
+      : `/dashboard/register?error=${encodeURIComponent("Discord sign-in failed")}`;
+    return clearOauthCookies(NextResponse.redirect(new URL(target, baseUrl)));
   }
 }

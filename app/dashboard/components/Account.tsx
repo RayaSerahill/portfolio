@@ -8,12 +8,13 @@ type AccountState = {
   suggestedUsername: string;
   statsUrl: string;
   name: string | null;
+  discord: string | null;
   deleted?: boolean;
 };
 
 export function Account() {
   const [account, setAccount] = useState<AccountState | null>(null);
-  const [busy, setBusy] = useState<null | "displayName" | "username" | "email" | "password" | "delete">(null);
+  const [busy, setBusy] = useState<null | "displayName" | "username" | "email" | "password" | "delete" | "discord">(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -43,6 +44,17 @@ export function Account() {
     void load();
     if (typeof window !== "undefined") {
       setVisibleUrlPrefix(`${window.location.origin}/stats/`);
+      const params = new URLSearchParams(window.location.search);
+      const successParam = params.get("success");
+      const errorParam = params.get("error");
+      if (successParam) setSuccess(successParam);
+      if (errorParam) setError(errorParam);
+      if (successParam || errorParam) {
+        params.delete("success");
+        params.delete("error");
+        const next = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ""}${window.location.hash}`;
+        window.history.replaceState({}, "", next);
+      }
     }
   }, []);
 
@@ -135,6 +147,13 @@ export function Account() {
     }
   };
 
+  const connectDiscord = () => {
+    setBusy("discord");
+    setError(null);
+    setSuccess(null);
+    window.location.href = "/api/auth/discord/start?mode=connect";
+  };
+
   const deleteAccount = async () => {
     if (!window.confirm("Are you sure")) return;
     if (!window.confirm("This is a permanent operation")) return;
@@ -162,7 +181,7 @@ export function Account() {
       <div>
         <h2 className="text-lg font-semibold text-zinc-900">Account</h2>
         <p className="mt-1 text-sm text-zinc-600">
-          Update the title shown on your stats page, the public stats URL, email address, and password for this account.
+          Update the title shown on your stats page, the public stats URL, email address, password, and connected Discord account.
         </p>
       </div>
 
@@ -204,7 +223,7 @@ export function Account() {
 
           <button
             type="submit"
-            disabled={busy === "displayName" || busy === "delete"}
+            disabled={busy === "displayName" || busy === "delete" || busy === "discord"}
             className="mt-4 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
           >
             {busy === "displayName" ? "Saving…" : "Save display name"}
@@ -240,7 +259,7 @@ export function Account() {
 
           <button
             type="submit"
-            disabled={busy === "username" || busy === "delete"}
+            disabled={busy === "username" || busy === "delete" || busy === "discord"}
             className="mt-4 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
           >
             {busy === "username" ? "Saving…" : "Save username"}
@@ -268,7 +287,7 @@ export function Account() {
 
           <button
             type="submit"
-            disabled={busy === "email" || busy === "delete"}
+            disabled={busy === "email" || busy === "delete" || busy === "discord"}
             className="mt-4 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
           >
             {busy === "email" ? "Saving…" : "Save email"}
@@ -319,12 +338,41 @@ export function Account() {
 
           <button
             type="submit"
-            disabled={busy === "password" || busy === "delete"}
+            disabled={busy === "password" || busy === "delete" || busy === "discord"}
             className="mt-4 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
           >
             {busy === "password" ? "Saving…" : "Change password"}
           </button>
         </form>
+
+        <div className="rounded-2xl border border-zinc-200 bg-white p-4">
+          <h3 className="text-sm font-semibold text-zinc-900">Discord</h3>
+          <p className="mt-1 text-xs text-zinc-500">Connect your Discord account so Discord login signs you into this existing dashboard account.</p>
+
+          <div className="mt-4 rounded-2xl border border-zinc-200 bg-[#fff7fb] px-3 py-3 text-sm text-zinc-900">
+            {account?.discord ? (
+              <>
+                <div className="text-xs uppercase tracking-wide text-zinc-500">Connected Discord ID</div>
+                <div className="mt-1 font-medium">{account.discord}</div>
+              </>
+            ) : (
+              <div className="text-zinc-600">No Discord account connected yet.</div>
+            )}
+          </div>
+
+          {!account?.discord ? (
+            <button
+              type="button"
+              onClick={connectDiscord}
+              disabled={busy === "discord" || busy === "delete"}
+              className="mt-4 rounded-xl bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-zinc-800 disabled:opacity-60"
+            >
+              {busy === "discord" ? "Redirecting…" : "Connect Discord"}
+            </button>
+          ) : (
+            <p className="mt-4 text-xs text-zinc-500">Logging in with this Discord account will now sign you into this user.</p>
+          )}
+        </div>
       </div>
 
       <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4">
@@ -335,7 +383,7 @@ export function Account() {
         <button
           type="button"
           onClick={() => void deleteAccount()}
-          disabled={busy === "delete"}
+          disabled={busy === "delete" || busy === "discord"}
           className="mt-4 rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-60"
         >
           {busy === "delete" ? "Deleting…" : "Delete account"}

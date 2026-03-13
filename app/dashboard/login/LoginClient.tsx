@@ -13,16 +13,17 @@ export default function AdminLoginPage() {
     if (!raw.startsWith("/")) return "/dashboard";
     return raw;
   }, [searchParams]);
+  const oauthError = useMemo(() => searchParams.get("error"), [searchParams]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(oauthError);
   const [busy, setBusy] = useState(false);
 
   return (
     <div className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
       <h1 className="text-xl font-semibold">Dashboard login</h1>
-      <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">Sign in with your email and password, or continue with Discord if you registered that way.</p>
+      <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">Sign in with your email and password, or continue with Discord if you registered that way or connected Discord later.</p>
 
       <a
         href="/api/auth/discord/start"
@@ -106,7 +107,7 @@ export default function AdminLoginPage() {
           Back to site
         </Link>
         <Link href="/dashboard/register" className="text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100">
-Create account
+          Create account
         </Link>
       </div>
     </div>

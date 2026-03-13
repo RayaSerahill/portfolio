@@ -18,7 +18,7 @@ export async function GET(req: Request) {
   const users = db.collection<UserDoc>("users");
   const user = await users.findOne(
     { _id: new ObjectId(gate.auth.id) },
-    { projection: { email: 1, username: 1, name: 1, deleted: 1 } }
+    { projection: { email: 1, username: 1, name: 1, discord: 1, deleted: 1 } }
   );
 
   if (!user) {
@@ -34,6 +34,7 @@ export async function GET(req: Request) {
       username: user.username ?? null,
       suggestedUsername,
       name: user.name ?? null,
+      discord: user.discord ?? null,
       deleted: user.deleted === true,
       statsUrl: `/stats/${user.username ?? suggestedUsername}`,
     },
@@ -185,6 +186,7 @@ export async function PATCH(req: Request) {
       email: updatedEmail,
       username: latestUsername,
       name: latestName,
+      discord: user.discord ?? null,
       deleted: false,
       statsUrl: `/stats/${latestUsername}`,
     },
