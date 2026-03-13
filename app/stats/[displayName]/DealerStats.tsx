@@ -135,9 +135,6 @@ export function DealerStats({
               <div className="mb-1 text-lg font-semibold" style={{ color: fontColor }}>
                 Daily dealer profit (last {barChartDays} dealing days)
               </div>
-              <div className="mb-3 text-sm opacity-70" style={{ color: fontColor }}>
-                Profit and loss colors follow your admin settings
-              </div>
               <Bar
                 data={dailyBarData}
                 options={{

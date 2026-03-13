@@ -144,7 +144,7 @@ export function Games() {
             <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                     <h2 className="text-lg font-semibold text-zinc-900">Games</h2>
-                    <p className="mt-1 text-sm text-zinc-600">Lists your imported games 20 at a time. You can filter between two date times. Deleting a game updates related stats.</p>
+                    <p className="mt-1 text-sm text-zinc-600">Lists your imported games 20 at a time. You can filter between two dates. Deleting a game updates related stats.</p>
                 </div>
                 <div className="rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-xs font-medium text-zinc-700">{title}</div>
             </div>

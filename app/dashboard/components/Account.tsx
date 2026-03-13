@@ -274,7 +274,7 @@ export function Account() {
           }}
         >
           <h3 className="text-sm font-semibold text-zinc-900">Email address</h3>
-          <p className="mt-1 text-xs text-zinc-500">No verification step yet. The new address becomes your login email immediately.</p>
+          <p className="mt-1 text-xs text-zinc-500">Change your email.</p>
 
           <label className="mt-4 block text-xs font-medium text-zinc-700">Email</label>
           <input
@@ -347,7 +347,7 @@ export function Account() {
 
         <div className="rounded-2xl border border-zinc-200 bg-white p-4">
           <h3 className="text-sm font-semibold text-zinc-900">Discord</h3>
-          <p className="mt-1 text-xs text-zinc-500">Connect your Discord account so Discord login signs you into this existing dashboard account.</p>
+          <p className="mt-1 text-xs text-zinc-500">Connect your Discord account, in the future you can login with the discord account.</p>
 
           <div className="mt-4 rounded-2xl border border-zinc-200 bg-[#fff7fb] px-3 py-3 text-sm text-zinc-900">
             {account?.discord ? (

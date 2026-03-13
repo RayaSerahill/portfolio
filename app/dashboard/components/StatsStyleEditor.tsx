@@ -488,7 +488,6 @@ export function StatsStyleEditor() {
 
       <div className="mt-5 rounded-2xl border border-[#FF9FC6]/30 bg-[#fff7fb] p-4">
         <div className="text-sm font-medium text-zinc-900">Pie chart colors</div>
-        <div className="mt-1 text-xs text-zinc-600">Default order follows the lesbian pride palette, with red used for bust.</div>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {pieColors.map((color, index) => (
             <AdvancedColorField key={index} label={`Color ${index + 1}`} value={color} onChange={(value) => setPieColor(index, value)} />

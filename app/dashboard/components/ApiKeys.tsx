@@ -70,7 +70,7 @@ export function ApiKeys() {
         <div>
           <h2 className="text-lg font-semibold text-zinc-900">API Key</h2>
           <p className="mt-1 text-sm text-zinc-600">
-            Generate one personal key for scripts and uploads. Regenerating immediately invalidates the old one.
+            Generate one personal key for automatic uploads, or other stuff if you are so inclined. Regenerating immediately invalidates the old one.
           </p>
         </div>
       </div>
