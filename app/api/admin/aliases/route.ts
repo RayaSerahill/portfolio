@@ -20,7 +20,7 @@ export async function GET(req: Request) {
   const aliases = db.collection<AliasDoc>("aliases");
 
   const rows = await aliases
-    .find({}, { projection: { primaryTag: 1, aliasTag: 1, createdAt: 1, createdBy: 1 } })
+    .find({ createdBy: gate.auth.id }, { projection: { primaryTag: 1, aliasTag: 1, createdAt: 1, createdBy: 1 } })
     .sort({ createdAt: -1 })
     .limit(200)
     .toArray();
@@ -70,7 +70,7 @@ export async function POST(req: Request) {
   } catch (e: any) {
     const code = e?.code;
     if (code === 11000) {
-      return NextResponse.json({ error: "That alias is already connected" }, { status: 409 });
+      return NextResponse.json({ error: "That alias is already connected in your account" }, { status: 409 });
     }
     return NextResponse.json({ error: "Failed to create alias" }, { status: 500 });
   }

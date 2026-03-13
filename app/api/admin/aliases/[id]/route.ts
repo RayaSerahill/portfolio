@@ -16,7 +16,7 @@ export async function DELETE(req: NextRequest, ctx: RouteContext<"/api/admin/ali
   const db = await getDb();
   const aliases = db.collection("aliases");
 
-  const result = await aliases.deleteOne({ _id: new ObjectId(id) });
+  const result = await aliases.deleteOne({ _id: new ObjectId(id), createdBy: gate.auth.id });
   if (!result.deletedCount) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }

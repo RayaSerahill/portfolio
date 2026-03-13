@@ -29,14 +29,17 @@ const run = async () => {
   await players.createIndex({ createdAt: -1 });
 
   const aliases = db.collection("aliases");
-  await aliases.createIndex({ aliasTag: 1 }, { unique: true });
-  await aliases.createIndex({ primaryTag: 1, aliasTag: 1 }, { unique: true });
-  await aliases.createIndex({ primaryTag: 1 });
-  await aliases.createIndex({ createdAt: -1 });
+  await aliases.dropIndex("aliasTag_1").catch(() => {});
+  await aliases.dropIndex("primaryTag_1_aliasTag_1").catch(() => {});
+  await aliases.createIndex({ createdBy: 1, aliasTag: 1 }, { unique: true });
+  await aliases.createIndex({ createdBy: 1, primaryTag: 1, aliasTag: 1 }, { unique: true });
+  await aliases.createIndex({ createdBy: 1, primaryTag: 1 });
+  await aliases.createIndex({ createdBy: 1, createdAt: -1 });
 
   const blacklist = db.collection("blacklist");
-  await blacklist.createIndex({ playerTag: 1 }, { unique: true });
-  await blacklist.createIndex({ createdAt: -1 });
+  await blacklist.dropIndex("playerTag_1").catch(() => {});
+  await blacklist.createIndex({ createdBy: 1, playerTag: 1 }, { unique: true });
+  await blacklist.createIndex({ createdBy: 1, createdAt: -1 });
 
   const games = db.collection("games");
   await games.createIndex({ createdAt: -1 });

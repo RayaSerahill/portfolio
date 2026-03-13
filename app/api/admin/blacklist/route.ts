@@ -19,7 +19,7 @@ export async function GET(req: Request) {
   const blacklist = db.collection<BlacklistDoc>("blacklist");
 
   const rows = await blacklist
-    .find({}, { projection: { playerTag: 1, createdAt: 1, createdBy: 1 } })
+    .find({ createdBy: gate.auth.id }, { projection: { playerTag: 1, createdAt: 1, createdBy: 1 } })
     .sort({ createdAt: -1 })
     .limit(200)
     .toArray();
@@ -63,7 +63,7 @@ export async function POST(req: Request) {
   } catch (e: any) {
     const code = e?.code;
     if (code === 11000) {
-      return NextResponse.json({ error: "That player is already hidden" }, { status: 409 });
+      return NextResponse.json({ error: "That player is already hidden in your account" }, { status: 409 });
     }
     return NextResponse.json({ error: "Failed to add to blacklist" }, { status: 500 });
   }

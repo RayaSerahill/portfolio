@@ -204,7 +204,7 @@ async function loadStats(displayName: string): Promise<LoadStatsResult> {
   const roundsHosted = await games.countDocuments({ uploaderId });
 
   const aliasRows = await aliases
-    .find({}, { projection: { primaryTag: 1, aliasTag: 1 } })
+    .find({ createdBy: uploaderId }, { projection: { primaryTag: 1, aliasTag: 1 } })
     .sort({ createdAt: -1 })
     .toArray();
 

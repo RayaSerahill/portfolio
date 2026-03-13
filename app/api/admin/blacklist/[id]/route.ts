@@ -16,7 +16,7 @@ export async function DELETE(req: NextRequest, ctx: RouteContext<"/api/admin/bla
   const db = await getDb();
   const blacklist = db.collection("blacklist");
 
-  const result = await blacklist.deleteOne({ _id: new ObjectId(id) });
+  const result = await blacklist.deleteOne({ _id: new ObjectId(id), createdBy: gate.auth.id });
   if (!result.deletedCount) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
