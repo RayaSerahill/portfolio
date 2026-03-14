@@ -1,13 +1,19 @@
 import { NextResponse } from "next/server";
 import { loadDealerStats } from "@/lib/dealerStats";
+import { requireUserRequest } from "@/lib/auth";
 
 export async function GET(req: Request) {
-  const url = new URL(req.url);
-  const uploaderId = (url.searchParams.get("uploaderId") ?? "").trim();
-  const days = Number(url.searchParams.get("days") ?? "20");
+  const gate = await requireUserRequest(req);
+  if (!gate.ok) return gate.res;
 
-  if (!uploaderId) {
-    return NextResponse.json({ ok: false, message: "Missing uploaderId" }, { status: 400 });
+  const url = new URL(req.url);
+  const requestedUploaderId = (url.searchParams.get("uploaderId") ?? "").trim();
+  const days = Number(url.searchParams.get("days") ?? "20");
+  const isAdmin = gate.auth.role === "owner" || gate.auth.role === "admin";
+  const uploaderId = requestedUploaderId || gate.auth.id;
+
+  if (!isAdmin && uploaderId !== gate.auth.id) {
+    return NextResponse.json({ ok: false, message: "Forbidden" }, { status: 403 });
   }
 
   const data = await loadDealerStats(uploaderId, days);

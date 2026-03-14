@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requireAdminRequest } from "@/lib/auth";
+import { requireUserRequest } from "@/lib/auth";
 import { ensureGameCollections, getDb } from "@/lib/db";
 import { ingestRound } from "@/lib/gameIngest";
 import { ingestReportCsv } from "@/lib/reportCsvIngest";
@@ -7,7 +7,7 @@ import { ingestReportCsv } from "@/lib/reportCsvIngest";
 export async function POST(req: Request) {
   await ensureGameCollections();
 
-  const gate = await requireAdminRequest(req);
+  const gate = await requireUserRequest(req);
   if (!gate.ok) return gate.res;
 
   const contentType = req.headers.get("content-type") ?? "";

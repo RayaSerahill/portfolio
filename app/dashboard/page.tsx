@@ -27,8 +27,9 @@ export default async function AdminPage() {
 
   const db = await getDb();
   const users = db.collection<UserDoc>("users");
-  const user = await users.findOne({ _id: new ObjectId(auth.id) });
-  const canManageUsers = user?.role === "owner" || user?.role === "admin";
+  const user = await users.findOne({ _id: new ObjectId(auth.id), deleted: { $ne: true } });
+  if (!user) redirect("/dashboard/login");
+  const canManageUsers = user.role === "owner" || user.role === "admin";
 
   return (
       <>

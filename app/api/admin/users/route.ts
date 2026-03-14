@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { requireRoles } from "@/lib/auth";
+import { requireSessionRoles } from "@/lib/auth";
 import { ensureAuthCollections, getDb, type UserDoc } from "@/lib/db";
 
 const PAGE_SIZE = 20;
 
 export async function GET(req: Request) {
   await ensureAuthCollections();
-  const gate = await requireRoles(req, ["owner", "admin"]);
+  const gate = await requireSessionRoles(req, ["owner", "admin"]);
   if (!gate.ok) return gate.res;
 
   const url = new URL(req.url);

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { Collection, ObjectId } from "mongodb";
-import { requireRoles } from "@/lib/auth";
+import { requireSessionRoles } from "@/lib/auth";
 import { ensureAuthCollections, getDb, type UserDoc, type UserRole } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
 import { getAvailableUsername, isValidUsername, normalizeUsername, usernameValidationMessage } from "@/lib/account";
@@ -19,7 +19,7 @@ async function ownerCount(users: Collection<UserDoc>) {
 
 export async function PATCH(req: Request, context: { params: Promise<{ id: string }> }) {
   await ensureAuthCollections();
-  const gate = await requireRoles(req, ["owner", "admin"]);
+  const gate = await requireSessionRoles(req, ["owner", "admin"]);
   if (!gate.ok) return gate.res;
 
   const { id } = await context.params;
@@ -123,7 +123,7 @@ export async function PATCH(req: Request, context: { params: Promise<{ id: strin
 
 export async function DELETE(req: Request, context: { params: Promise<{ id: string }> }) {
   await ensureAuthCollections();
-  const gate = await requireRoles(req, ["owner", "admin"]);
+  const gate = await requireSessionRoles(req, ["owner", "admin"]);
   if (!gate.ok) return gate.res;
 
   const { id } = await context.params;

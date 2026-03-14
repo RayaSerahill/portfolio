@@ -140,4 +140,22 @@ export async function requireRoles(req: Request, roles: UserRole[]) {
   return gate;
 }
 
-export const requireAdminRequest = requireUserRequest;
+export async function requireSessionRequest(req: Request) {
+  const gate = await requireUserRequest(req);
+  if (!gate.ok) return gate;
+  if (gate.method !== "cookie") {
+    return { ok: false as const, res: Response.json({ error: "Session authentication required" }, { status: 401 }) };
+  }
+  return gate;
+}
+
+export async function requireSessionRoles(req: Request, roles: UserRole[]) {
+  const gate = await requireSessionRequest(req);
+  if (!gate.ok) return gate;
+  if (!roles.includes(gate.auth.role)) {
+    return { ok: false as const, res: Response.json({ error: "Forbidden" }, { status: 403 }) };
+  }
+  return gate;
+}
+
+export const requireAdminRequest = requireSessionRequest;
