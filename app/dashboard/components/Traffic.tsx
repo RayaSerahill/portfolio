@@ -28,6 +28,15 @@ const options = {
         legend: {
             display: false
         }
+    },
+    scales: {
+        y: {
+            ticks: {
+                callback: function(value) {
+                    return Number.isInteger(value) ? value : null;
+                },
+            }
+        }
     }
 };
 
