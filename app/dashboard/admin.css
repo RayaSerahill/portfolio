@@ -9,6 +9,17 @@ body {
 .admin-item-container {
   padding: 20px;
 }
+.admin-item-container .internal-link {
+  background-color: rgba(255, 159, 198, 0.3);
+  border-bottom: 2px dashed #ff9fc6;
+  cursor: pointer;
+  animation: fadeIn 0.5s ease-in-out;
+  transition: all 0.3s ease-in-out;
+}
+.admin-item-container .internal-link:hover {
+  border-bottom: 2px solid #ff9fc6;
+  background-color: rgba(255, 159, 198, 0);
+}
 
 .cute-border {
   border: 2px solid #ff9fc6;

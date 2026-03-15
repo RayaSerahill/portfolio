@@ -1,4 +1,9 @@
-export function Home() {
+"use client";
+import type { AdminSection } from "../AdminSectionsClient";
+import { useAdminNav } from "../AdminSectionsClient";
+
+export function Home({ onNavigate }: { onNavigate: (section: AdminSection) => void }) {
+  const navigate = useAdminNav();
   return (
     <div className="rounded-3xl cute-border admin-item-container">
       <div>
@@ -11,36 +16,12 @@ export function Home() {
       <div className="mt-4 rounded-2xl border border-zinc-200 bg-white p-4 text-sm text-zinc-700">
         <p className="font-medium text-zinc-900">How to use?</p>
         <p className="mt-2">
-          To start with, you need to import some games! There are two ways of doing this, either manually through the game import section, or automatically by downloading a dalamud plugin and generating an API key!
+          To start with, you need to import some games! You can do this with the small tutorial below :3
         </p>
         <div className="mt-4 space-y-3">
           <div>
-            <h3 className="text-sm font-semibold text-zinc-900">Manual way</h3>
+            <h3 className="text-sm font-semibold text-zinc-900">sbjStats Plugin</h3>
             <p className={"mt-2"}>
-              There are a couple steps to this, but don't worry, it's not that bad!
-            </p>
-            <ol className="mt-2 list-inside list-decimal">
-              <li>
-                Open up simpleBlackjack plugin in FFXIV and navigate to "Stats" section
-              </li>
-              <li>
-                Open up "Archive" and scroll to the bottom
-              </li>
-              <li>
-                Open up the "Export all records in all Archives as CSV" section, and press "Export data"
-              </li>
-              <li>
-                Upload the generated file in the game import section of this dashboard, and wait for the import to finish!
-              </li>
-              <li>
-                Aand done! You can now explore your stats, and optionally customize how they are displayed in the "Stats style" section of the dashboard!
-              </li>
-            </ol>
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-zinc-900">Automatic upload</h3>
-            <p className={"mt-2"}>
-              Best paired with the manual import, as automatic upload only uploads new games, not ones you have already had.
             </p>
             <ol className="mt-2 list-inside list-decimal">
               <li>
@@ -50,10 +31,13 @@ export function Home() {
                 Install the sbjStats plugin from the repository, and open it up in the plugin list
               </li>
               <li>
-                Navigate to the "API" tab on this dashboard, and generate a new API key
+                Navigate to the <span className={"internal-link"} onClick={() => navigate("api-keys")}>API Keys</span> tab on this dashboard, and generate a new API key
               </li>
               <li>
                 Paste the generated API key in the plugin, and enable automatic upload!
+              </li>
+              <li>
+                If you have existing games you want to upload, you can click the "Upload existing stats" button in the plugin, which will upload all games that are not yet uploaded to the dashboard!
               </li>
             </ol>
           </div>

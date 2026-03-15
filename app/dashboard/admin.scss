@@ -10,6 +10,19 @@ body {
 
 .admin-item-container {
   padding: 20px;
+
+  .internal-link {
+    background-color: rgba($pink, 0.3);
+    border-bottom: 2px dashed $pink;
+    cursor: pointer;
+    animation: fadeIn 0.5s ease-in-out;
+    transition: all 0.3s ease-in-out;
+
+    &:hover {
+      border-bottom: 2px solid $pink;
+      background-color: rgba($pink, 0);
+    }
+  }
 }
 
 .cute-border {

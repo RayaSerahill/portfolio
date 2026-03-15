@@ -1,8 +1,14 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, createContext, useContext  } from "react";
 
-type AdminSection = "home" | "traffic" | "import" | "account" | "games" | "aliases" | "hidden-players" | "api-keys" | "stats-style" | "users" | null;
+export type AdminSection = "home" | "traffic" | "import" | "account" | "games" | "aliases" | "hidden-players" | "api-keys" | "stats-style" | "users" | null;
+
+const AdminNavContext = createContext<(section: AdminSection) => void>(() => {});
+
+export function useAdminNav() {
+  return useContext(AdminNavContext);
+}
 
 export function AdminSectionsClient({
                                       home,
@@ -17,7 +23,7 @@ export function AdminSectionsClient({
                                       users,
                                       canManageUsers,
                                     }: {
-  home: React.ReactNode;
+  home: (onNavigate: (section: AdminSection) => void) => React.ReactNode;
   traffic: React.ReactNode;
   gameImport: React.ReactNode;
   account: React.ReactNode;
@@ -54,6 +60,7 @@ export function AdminSectionsClient({
   };
 
   return (
+    <AdminNavContext.Provider value={showSection}>
       <>
         <aside className="hidden lg:block">
           <div className="fixed admin-nav-container left-[max(1rem,calc(50%-36rem))] z-30 w-[245px]">
@@ -129,5 +136,6 @@ export function AdminSectionsClient({
           </main>
         </div>
       </>
+    </AdminNavContext.Provider>
   );
 }
