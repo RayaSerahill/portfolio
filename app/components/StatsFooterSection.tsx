@@ -18,7 +18,7 @@ export function StatsFooterSection() {
         .trim();
     };
 
-    const parseBrightness = (color) => {
+    const parseBrightness = (color: string) => {
       const match = color.match(/\d+/g);
       if (match) {
         const [r, g, b] = match.map(Number);
