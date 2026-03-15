@@ -23,6 +23,25 @@ const nextConfig: NextConfig = {
             },
         ];
     },
+    async redirects() {
+        return [
+            {
+                source: '/admin/:path*',
+                destination: 'https://stats.serahill.net/dashboard/',
+                permanent: true,
+            },
+            {
+                source: '/dashboard/:path*',
+                destination: 'https://stats.serahill.net/dashboard/',
+                permanent: true,
+            },
+            {
+                source: '/stats/:path*',
+                destination: 'https://stats.serahill.net/:path*',
+                permanent: true,
+            },
+        ];
+    },
 };
 
 export default nextConfig;
