@@ -39,10 +39,25 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Display name must be 80 characters or less" }, { status: 400 });
   }
 
+  const bannedUsernames = [
+    // Reserved words
+    "admin",
+    "administrator",
+    "privacy",
+    "terms",
+    "support",
+    "contact",
+    "help",
+    "stats",
+    "dashboard",
+    // Common words to prevent impersonation
+  ]
+
   if (usernameInput) {
     const validation = usernameValidationMessage(usernameInput);
     if (validation) return NextResponse.json({ error: validation }, { status: 400 });
     if (!isValidUsername(usernameInput)) return NextResponse.json({ error: "Invalid username" }, { status: 400 });
+    if (bannedUsernames.includes(usernameInput)) return NextResponse.json({ error: "That username is not allowed" }, { status: 400 });
   }
 
   const db = await getDb();

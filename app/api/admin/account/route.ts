@@ -107,6 +107,20 @@ export async function PATCH(req: Request) {
     set.name = name;
   }
 
+  const bannedUsernames = [
+    // Reserved words
+    "admin",
+    "administrator",
+    "privacy",
+    "terms",
+    "support",
+    "contact",
+    "help",
+    "stats",
+    "dashboard",
+    // Common words to prevent impersonation
+  ]
+
   if (typeof body.username === "string") {
     const normalized = normalizeUsername(body.username);
     const validation = usernameValidationMessage(normalized);
@@ -115,6 +129,9 @@ export async function PATCH(req: Request) {
     }
     if (!isValidUsername(normalized)) {
       return NextResponse.json({ error: "Invalid username" }, { status: 400 });
+    }
+    if (bannedUsernames.includes(normalized)) {
+      return NextResponse.json({ error: "That username is not allowed" }, { status: 400 });
     }
     const available = await getAvailableUsername(db, normalized, userId);
     if (available !== normalized) {

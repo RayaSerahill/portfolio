@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ensureAuthCollections, ensureGameCollections, getDb } from "@/lib/db";
 import { DEFAULT_STATS_STYLE, getBackgroundStyleCss, getStatsFontFamily } from "@/lib/statsStyle";
+import { StatsFooterSection } from "../components/StatsFooterSection"
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -72,7 +73,7 @@ export default async function StatsOverviewPage() {
   const elementBackgroundStyle = getBackgroundStyleCss(style.elementBackground);
 
   return (
-    <div className="min-h-screen w-full px-4 py-10" style={{ ...pageBackgroundStyle, color: style.fontColor, fontFamily }}>
+    <div className="container-main min-h-screen w-full px-4 py-10" style={{ ...pageBackgroundStyle, color: style.fontColor, fontFamily }}>
       <div
         className="mx-auto w-full max-w-5xl rounded-3xl border border-black/10 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.18)]"
         style={containerBackgroundStyle}
@@ -131,6 +132,7 @@ export default async function StatsOverviewPage() {
           </div>
         </div>
       </div>
+      <StatsFooterSection />
     </div>
   );
 }

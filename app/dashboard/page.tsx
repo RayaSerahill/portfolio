@@ -15,6 +15,7 @@ import { Games } from "./components/Games";
 import { Users } from "./components/Users";
 import { Home } from "./components/Home";
 import { Traffic } from "./components/Traffic";
+import { StatsFooterSection } from "../components/StatsFooterSection"
 
 export default async function AdminPage() {
   await ensureAuthCollections();
@@ -60,6 +61,7 @@ export default async function AdminPage() {
               users={canManageUsers ? <Users /> : null}
               canManageUsers={canManageUsers}
           />
+          <StatsFooterSection />
         </div>
       </>
   );
