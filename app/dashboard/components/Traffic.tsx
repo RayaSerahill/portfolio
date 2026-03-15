@@ -32,9 +32,8 @@ const options = {
     scales: {
         y: {
             ticks: {
-                callback: function(value) {
-                    return Number.isInteger(value) ? value : null;
-                },
+                callback: (value: string | number) =>
+                  Number.isInteger(Number(value)) ? value : null
             }
         }
     }
