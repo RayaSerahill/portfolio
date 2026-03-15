@@ -23,7 +23,7 @@ export function AdminSectionsClient({
                                       users,
                                       canManageUsers,
                                     }: {
-  home: (onNavigate: (section: AdminSection) => void) => React.ReactNode;
+  home: React.ReactNode;
   traffic: React.ReactNode;
   gameImport: React.ReactNode;
   account: React.ReactNode;

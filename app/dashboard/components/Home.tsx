@@ -1,8 +1,7 @@
 "use client";
-import type { AdminSection } from "../AdminSectionsClient";
 import { useAdminNav } from "../AdminSectionsClient";
 
-export function Home({ onNavigate }: { onNavigate: (section: AdminSection) => void }) {
+export function Home() {
   const navigate = useAdminNav();
   return (
     <div className="rounded-3xl cute-border admin-item-container">
