@@ -1,5 +1,7 @@
 :root {
   --background: #ffffff;
+  --hex-size: 160px;
+  --hex-gap: 8px;
 }
 
 @font-face {
@@ -267,6 +269,36 @@ section.social .socials-container .discord-container .discord-icon {
   text-shadow: -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff;
   font-size: 14px;
   font-weight: normal;
+}
+
+.cute-border {
+  border: 2px dashed #ff9fc6;
+  border-radius: 30px;
+  margin: 40px 45px 0;
+  padding: 20px 40px;
+}
+
+.back-to-front:hover {
+  text-decoration: underline;
+}
+
+.hex-container {
+  display: flex;
+  flex-wrap: wrap;
+  width: calc(var(--hex-size) * 3 + var(--hex-gap) * 4);
+  margin: 0 auto;
+}
+
+.hex-item {
+  width: var(--s);
+  margin: var(--m);
+  height: calc(var(--s) * 1.1547);
+  display: inline-block;
+  font-size: initial;
+  clip-path: polygon(0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%, 50% 0%);
+  background: red;
+  margin-bottom: calc(var(--m) - var(--s) * 0.2885);
+  width: 120px;
 }
 
 /*# sourceMappingURL=neko.css.map */
