@@ -290,14 +290,19 @@ section.social .socials-container .discord-container .discord-icon {
   margin-left: 25px;
 }
 .hex-container .hex-item {
-  margin: 3px;
   height: calc(var(--s) * 1.1547);
   display: inline-block;
   font-size: initial;
   clip-path: polygon(0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%, 50% 0%);
   background: red;
+  margin: 5px;
   margin-bottom: calc(var(--m) - var(--s) * 0.2885);
   width: 160px;
+  transition: transform 0.2s;
+}
+.hex-container .hex-item:hover {
+  transform: translateY(-5px);
+  cursor: pointer;
 }
 .hex-container .row {
   height: calc(var(--hex-size) / 2 + 80px);

@@ -1,12 +1,14 @@
-import type { ReactNode } from "react";
+'use client';
+
+import {ReactNode, useEffect, useState} from "react";
 import "../neko/assets/css/neko.css";
 
 const hexItems = [
   {
-    title: "Quiet Confidence",
-    description: "A gentle, flowing idle animation with subtle swaying movements",
+    title: "Eternity Collar",
+    description: "A simple eternity collar mod for all female races",
     image: "/velvet/portfolio1.png",
-    alt: "",
+    alt: "A simple eternity collar mod for all female races",
     link: ""
   },
   {
@@ -72,6 +74,57 @@ function isDivisibleByThree(n: number): string {
 }
 
 export default function ModsPage() {
+
+  const [tooltip, setTooltip] = useState({
+    visible: false,
+    title: '',
+    text: '',
+    x: 0,
+    y: 0,
+  });
+
+  const showTooltip = (title: string, text: string, e: React.MouseEvent<HTMLAnchorElement>) => {
+    setTooltip({
+      visible: true,
+      title,
+      text,
+      x: e.clientX,
+      y: e.clientY,
+    });
+  };
+
+  const moveTooltip = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    setTooltip((prev) => ({
+      ...prev,
+      x: e.clientX,
+      y: e.clientY,
+    }));
+  };
+
+  const hideTooltip = () => {
+    setTooltip((prev) => ({
+      ...prev,
+      visible: false,
+    }));
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setTooltip((prev) =>
+        prev.visible
+          ? {
+            ...prev,
+            x: e.clientX,
+            y: e.clientY,
+          }
+          : prev
+      );
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   return (
     <>
       <div className="max-w-2xl mx-auto px-4 raya-container">
@@ -88,14 +141,34 @@ export default function ModsPage() {
             ).map((row, rowIndex) => (
               <div className={"row"} key={rowIndex}>
                 {row.map((item, index) => (
-                  <div className={"hex-item"} key={index}>
-                    <img srcSet={item.image} alt={item.alt} />
+                  <div
+                    className={"hex-item"}
+                    key={index}
+                  >
+                    <a
+                      onMouseEnter={(e) => showTooltip(item.title, item.alt, e)}
+                      onMouseMove={moveTooltip}
+                      onMouseLeave={hideTooltip}
+                    >
+                      <img srcSet={item.image} alt={item.alt} />
+                    </a>
                   </div>
                 ))}
               </div>
             ))}
           </div>
         </div>
+      </div>
+
+      <div
+        className={`social-hover-popup ${tooltip.visible ? 'visible' : ''}`}
+        style={{
+          left: tooltip.x + 18,
+          top: tooltip.y + 18,
+        }}
+      >
+        <h3>{tooltip.title}</h3>
+        <p>{tooltip.text}</p>
       </div>
     </>
   )
