@@ -4,6 +4,8 @@ import {ReactNode, useEffect, useState} from "react";
 import "../neko/assets/css/neko.css";
 import hexItems from "./assets/modsList.json";
 import { useTooltip } from "./assets/tooltips";
+import { useModalHandler } from "./assets/modalHandler";
+import { Modal } from "./assets/modal";
 
 function isDivisibleByThree(n: number): string {
   return n % 3 === 0 ? "true" : "false";
@@ -12,6 +14,7 @@ function isDivisibleByThree(n: number): string {
 export default function ModsPage() {
 
   const { tooltip, showTooltip, moveTooltip, hideTooltip } = useTooltip();
+  const { isOpen, isVisible, activeItem, openModal, closeModal } = useModalHandler();
 
   return (
     <>
@@ -37,6 +40,10 @@ export default function ModsPage() {
                       onMouseEnter={(e) => showTooltip(item.title, item.alt, e)}
                       onMouseMove={moveTooltip}
                       onMouseLeave={hideTooltip}
+                      onClick={(e)  => {
+                        e.preventDefault();
+                        openModal(item);
+                      }}
                     >
                       <img srcSet={item.image} alt={item.alt} />
                     </a>
@@ -58,6 +65,8 @@ export default function ModsPage() {
         <h3>{tooltip.title}</h3>
         <p>{tooltip.text}</p>
       </div>
+
+      <Modal isOpen={isOpen} isVisible={isVisible} activeItem={activeItem} onClose={closeModal} />
     </>
   )
 }
