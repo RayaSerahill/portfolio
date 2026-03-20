@@ -30,7 +30,46 @@ const hexItems = [
     alt: "",
     link: ""
   },
+  {
+    title: "Quiet Confidence",
+    description: "A gentle, flowing idle animation with subtle swaying movements",
+    image: "/velvet/portfolio1.png",
+    alt: "",
+    link: ""
+  },
+  {
+    title: "Quiet Confidence",
+    description: "A gentle, flowing idle animation with subtle swaying movements",
+    image: "/velvet/portfolio1.png",
+    alt: "",
+    link: ""
+  },
+  {
+    title: "Quiet Confidence",
+    description: "A gentle, flowing idle animation with subtle swaying movements",
+    image: "/velvet/portfolio1.png",
+    alt: "",
+    link: ""
+  },
+  {
+    title: "Quiet Confidence",
+    description: "A gentle, flowing idle animation with subtle swaying movements",
+    image: "/velvet/portfolio1.png",
+    alt: "",
+    link: ""
+  },
+  {
+    title: "Quiet Confidence",
+    description: "A gentle, flowing idle animation with subtle swaying movements",
+    image: "/velvet/portfolio1.png",
+    alt: "",
+    link: ""
+  },
 ] as const;
+
+function isDivisibleByThree(n: number): string {
+  return n % 3 === 0 ? "true" : "false";
+}
 
 export default function ModsPage() {
   return (
@@ -40,9 +79,19 @@ export default function ModsPage() {
         <div className={"flex flex-col gap-4 mt-8 cute-border"}>
           <a className={"back-to-front"} href={"/"}> &lt;-- Back to front page</a>
           <div className={"hex-container"}>
-            {hexItems.map((item, index) => (
-              <div className={"hex-item"}>
-                <img srcSet={item.image}  alt={item.alt}/>
+            {hexItems.reduce<{ title: string; description: string; image: string; alt: string; link: string }[][]>(
+              (rows, item, index) => {
+                if (index % 3 === 0) rows.push([]);
+                rows[rows.length - 1].push(item);
+                return rows;
+              }, []
+            ).map((row, rowIndex) => (
+              <div className={"row"} key={rowIndex}>
+                {row.map((item, index) => (
+                  <div className={"hex-item"} key={index}>
+                    <img srcSet={item.image} alt={item.alt} />
+                  </div>
+                ))}
               </div>
             ))}
           </div>

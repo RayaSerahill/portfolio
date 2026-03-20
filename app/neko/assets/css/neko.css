@@ -272,7 +272,7 @@ section.social .socials-container .discord-container .discord-icon {
 }
 
 .cute-border {
-  border: 2px dashed #ff9fc6;
+  /* border: 2px dashed #ff9fc6; */
   border-radius: 30px;
   margin: 40px 45px 0;
   padding: 20px 40px;
@@ -287,18 +287,23 @@ section.social .socials-container .discord-container .discord-icon {
   flex-wrap: wrap;
   width: calc(var(--hex-size) * 3 + var(--hex-gap) * 4);
   margin: 0 auto;
+  margin-left: 25px;
 }
-
-.hex-item {
-  width: var(--s);
-  margin: var(--m);
+.hex-container .hex-item {
+  margin: 3px;
   height: calc(var(--s) * 1.1547);
   display: inline-block;
   font-size: initial;
   clip-path: polygon(0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%, 50% 0%);
   background: red;
   margin-bottom: calc(var(--m) - var(--s) * 0.2885);
-  width: 120px;
+  width: 160px;
+}
+.hex-container .row {
+  height: calc(var(--hex-size) / 2 + 80px);
+}
+.hex-container .row:nth-child(2n) {
+  margin-left: calc((var(--hex-size) / 2 + var(--hex-gap) / 2) * -1);
 }
 
 /*# sourceMappingURL=neko.css.map */
