@@ -2,72 +2,8 @@
 
 import {ReactNode, useEffect, useState} from "react";
 import "../neko/assets/css/neko.css";
-
-const hexItems = [
-  {
-    title: "Eternity Collar",
-    description: "A simple eternity collar mod for all female races",
-    image: "/velvet/portfolio1.png",
-    alt: "A simple eternity collar mod for all female races",
-    link: ""
-  },
-  {
-    title: "Quiet Confidence",
-    description: "A gentle, flowing idle animation with subtle swaying movements",
-    image: "/velvet/portfolio1.png",
-    alt: "",
-    link: ""
-  },
-  {
-    title: "Quiet Confidence",
-    description: "A gentle, flowing idle animation with subtle swaying movements",
-    image: "/velvet/portfolio1.png",
-    alt: "",
-    link: ""
-  },
-  {
-    title: "Quiet Confidence",
-    description: "A gentle, flowing idle animation with subtle swaying movements",
-    image: "/velvet/portfolio1.png",
-    alt: "",
-    link: ""
-  },
-  {
-    title: "Quiet Confidence",
-    description: "A gentle, flowing idle animation with subtle swaying movements",
-    image: "/velvet/portfolio1.png",
-    alt: "",
-    link: ""
-  },
-  {
-    title: "Quiet Confidence",
-    description: "A gentle, flowing idle animation with subtle swaying movements",
-    image: "/velvet/portfolio1.png",
-    alt: "",
-    link: ""
-  },
-  {
-    title: "Quiet Confidence",
-    description: "A gentle, flowing idle animation with subtle swaying movements",
-    image: "/velvet/portfolio1.png",
-    alt: "",
-    link: ""
-  },
-  {
-    title: "Quiet Confidence",
-    description: "A gentle, flowing idle animation with subtle swaying movements",
-    image: "/velvet/portfolio1.png",
-    alt: "",
-    link: ""
-  },
-  {
-    title: "Quiet Confidence",
-    description: "A gentle, flowing idle animation with subtle swaying movements",
-    image: "/velvet/portfolio1.png",
-    alt: "",
-    link: ""
-  },
-] as const;
+import hexItems from "./assets/modsList.json";
+import { useTooltip } from "./assets/tooltips";
 
 function isDivisibleByThree(n: number): string {
   return n % 3 === 0 ? "true" : "false";
@@ -75,55 +11,7 @@ function isDivisibleByThree(n: number): string {
 
 export default function ModsPage() {
 
-  const [tooltip, setTooltip] = useState({
-    visible: false,
-    title: '',
-    text: '',
-    x: 0,
-    y: 0,
-  });
-
-  const showTooltip = (title: string, text: string, e: React.MouseEvent<HTMLAnchorElement>) => {
-    setTooltip({
-      visible: true,
-      title,
-      text,
-      x: e.clientX,
-      y: e.clientY,
-    });
-  };
-
-  const moveTooltip = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    setTooltip((prev) => ({
-      ...prev,
-      x: e.clientX,
-      y: e.clientY,
-    }));
-  };
-
-  const hideTooltip = () => {
-    setTooltip((prev) => ({
-      ...prev,
-      visible: false,
-    }));
-  };
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setTooltip((prev) =>
-        prev.visible
-          ? {
-            ...prev,
-            x: e.clientX,
-            y: e.clientY,
-          }
-          : prev
-      );
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+  const { tooltip, showTooltip, moveTooltip, hideTooltip } = useTooltip();
 
   return (
     <>
