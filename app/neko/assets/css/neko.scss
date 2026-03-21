@@ -1,5 +1,7 @@
 :root {
   --background: #ffffff;
+  --hex-size: 160px;
+  --hex-gap: 8px;
 }
 
 @font-face {
@@ -304,5 +306,222 @@ section {
       font-size: 14px;
       font-weight: normal;
     }
+  }
+}
+
+.cute-border {
+  /* border: 2px dashed #ff9fc6; */
+  border-radius: 30px;
+  margin: 40px 45px 0;
+  padding: 20px 40px;
+}
+
+.back-to-front {
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.hex-container {
+  display: flex;
+  flex-wrap: wrap;
+  width: calc(var(--hex-size) * 3 + var(--hex-gap) * 4);
+  margin: 0 auto 0 25px;
+
+  .hex-item {
+    height: 200px;
+    display: inline-block;
+    font-size:initial;
+    clip-path: polygon(0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%, 50% 0%);
+    background: red;
+    margin: 5px;
+    margin-bottom: calc(var(--m) - var(--s)*0.2885);
+    width:160px;
+    transition: transform 0.2s;
+
+    img {
+      width: unset;
+      margin-left: -20px;
+      height: 200px;
+      max-width: unset;
+    }
+
+    &:hover {
+      transform: translateY(-5px);
+      cursor: pointer;
+    }
+  }
+
+  .row {
+    height: calc((var(--hex-size) / 2) + 80px);
+
+    &:nth-child(2n) {
+      margin-left: calc(calc(var(--hex-size) / 2 + var(--hex-gap) / 2) * -1);
+    }
+  }
+}
+
+
+.mods-modal-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0);
+  transition: background-color 300ms ease;
+
+  &.visible {
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+.mods-modal-panel {
+  position: relative;
+  width: 90%;
+  max-width: 560px;
+  padding: 1rem 1rem 1.5rem;
+  background: linear-gradient(180deg, #fff7fb 0%, #fff 100%);
+  border: 2px solid rgba(255, 159, 198, 0.45);
+  border-radius: 24px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: translateY(20px) scale(0.97);
+  transition: transform 300ms ease, opacity 300ms ease;
+  overflow: hidden;
+
+  &.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.mods-modal-image {
+  width: 100%;
+  max-height: 400px;
+  object-fit: cover;
+  object-position: center;
+  margin-bottom: 1.25rem;
+  border-radius: 16px;
+  background: #ffd7e7;
+}
+
+.mods-modal-title {
+  margin: 0 0 0.75rem;
+  color: #ff7bb1;
+  font-size: 26px;
+  text-shadow: -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff;
+}
+
+.mods-modal-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.mods-modal-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff9fc6 0%, #ff6fa8 100%);
+  color: #fff;
+  font-size: 0.8rem;
+  line-height: 1;
+  text-shadow: none;
+  box-shadow: 0 8px 18px rgba(255, 111, 168, 0.28);
+}
+
+.mods-modal-description {
+  margin: 0;
+  color: #8a4a68;
+  line-height: 1.6;
+  text-shadow: none;
+}
+
+.mods-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 999px;
+  background: rgba(255, 111, 168, 0.92);
+  color: #fff;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  box-shadow: 0 10px 24px rgba(255, 111, 168, 0.25);
+}
+
+.mods-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-height: 2.75rem;
+  margin-top: 1.5rem;
+}
+
+.mods-modal-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.2rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff9fc6 0%, #ff6fa8 100%);
+  color: #fff;
+  font-family: font, serif;
+  text-decoration: none;
+  text-shadow: none;
+  box-shadow: 0 12px 28px rgba(255, 111, 168, 0.28);
+}
+
+.mods-modal-private {
+  margin: 0;
+  color: #b06b8c;
+  font-style: italic;
+  text-shadow: none;
+}
+
+.cute-nav {
+  margin-top: -45px;
+  float: right;
+  padding-right: 3rem;
+
+  .cute-nav-item {
+    padding: 5px 10px;
+    border: 2px dashed #ff9fc6;
+    border-radius: 20px;
+
+    &:hover {
+      background-color: #ff9fc6;
+      color: white;
+      transition: background-color 0.2s, color 0.2s;
+      box-shadow: none;
+      text-shadow: none;
+      border: 2px dashed #ffffff;
+    }
+  }
+}
+
+@media (max-width: 640px) {
+  .mods-modal-panel {
+    width: calc(100% - 1.5rem);
+    padding: 0.75rem 0.75rem 1.25rem;
+  }
+
+  .mods-modal-image {
+    max-height: 280px;
+  }
+
+  .mods-modal-title {
+    font-size: 22px;
+  }
+
+  .mods-modal-actions {
+    justify-content: center;
   }
 }

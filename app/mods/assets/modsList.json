@@ -1,0 +1,92 @@
+[
+  {
+    "title": "Anactoria",
+    "description": "A cute solo sitting animation with hands adorably on your face.",
+    "image": "/mods/anactoria.webp",
+    "fullImage": "/mods/anactoria-full.webp",
+    "alt": "A cute solo sitting animation with hands adorably on your face.",
+    "link": "",
+    "tags": ["Animation", "Female", "Cute", "Sitting"]
+  },
+  {
+    "title": "Sakura Blouse",
+    "description": "A slightly revealing loose blouse with an optional heart window on the chest.",
+    "image": "/mods/blouse.webp",
+    "fullImage": "/mods/blouse.webp",
+    "alt": "A slightly revealing loose blouse with an optional heart window on the chest.",
+    "link": "",
+    "tags": ["Top", "Blouse", "Female", "Gear"]
+  },
+  {
+    "title": "Piercing Collection",
+    "description": "A facial piercing collection with bridge, nose, lip, fang accents and much more.",
+    "image": "/mods/collection.webp",
+    "fullImage": "/mods/collectiom-full.webp",
+    "alt": "A facial piercing collection with bridge, nose, lip, fang accents and much more.",
+    "link": "https://www.xivmodarchive.com/modid/133167",
+    "tags": ["Piercing", "Face", "Collection", "Accessory", "Female", "Marie", "Vanilla"]
+  },
+  {
+    "title": "Eternity Collar",
+    "description": "A simple eternity collar mod for all female races.",
+    "image": "/mods/eternity.webp",
+    "fullImage": "/mods/eternity-full.webp",
+    "alt": "Preview of the Eternity Collar accessory mod.",
+    "link": "https://www.xivmodarchive.com/modid/130851",
+    "tags": ["Accessory", "Female", "Eternity Collar", "Collar"]
+  },
+  {
+    "title": "Galaxy Mask",
+    "description": "A cosmic half-face mask with a starfield texture.",
+    "image": "/mods/galaxy.webp",
+    "fullImage": "/mods/galaxy.webp",
+    "alt": "Preview of a galaxy-themed half-face mask mod.",
+    "link": "",
+    "tags": ["Mask", "Face", "Galaxy"]
+  },
+  {
+    "title": "Industrial Pride",
+    "description": "A pride-themed industrial ear piercing set for Miqo'te clockwork flower ears.",
+    "image": "/mods/pride.webp",
+    "fullImage": "/mods/pride-full.webp",
+    "alt": "Preview of pride-themed industrial ear piercings.",
+    "link": "https://www.xivmodarchive.com/modid/128286",
+    "tags": ["Piercing", "Ears", "Pride"]
+  },
+  {
+    "title": "Quiet Confidence",
+    "description": "A soft and shy standing animation for all female races .",
+    "image": "/mods/quiet.webp",
+    "fullImage": "/mods/quiet-full.webp",
+    "alt": "A soft and shy standing animation for all female races.",
+    "link": "",
+    "tags": ["Animation", "Female", "Shy", "Standing"]
+  },
+  {
+    "title": "Serpent's Trinity",
+    "description": "A lip piercing set featuring a central ring and teardrop studs.",
+    "image": "/mods/serpent.webp",
+    "fullImage": "/mods/serpent-full.webp",
+    "alt": "Preview of the Serpent's Trinity lip piercing mod.",
+    "link": "https://www.xivmodarchive.com/modid/130395",
+    "tags": ["Piercing", "Lips", "Accessory"]
+  },
+  {
+    "title": "Soft Embrace",
+    "description": "A couples animation, a cute sitting cuddle pose.",
+    "image": "/mods/soft.webp",
+    "fullImage": "/mods/soft-full.webp",
+    "alt": "A couples animation, a cute sitting cuddle pose.",
+    "link": "",
+    "tags": ["Animation", "Sitting", "Pose", "Couples", "Unisex"]
+  },
+  {
+    "title": "Starry Bun",
+    "description": "A star accessory styled around tech ears for buns.",
+    "image": "/mods/starry.webp",
+    "fullImage": "/mods/starry.webp",
+    "alt": "A star accessory styled around tech ears for buns.",
+    "link": "",
+    "tags": ["Accessory", "Viera", "Stars"]
+  }
+]

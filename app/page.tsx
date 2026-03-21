@@ -95,6 +95,13 @@ export default function NekoPage() {
     return (
         <>
             <div className="max-w-2xl mx-auto px-4 raya-container">
+                <div className="cute-nav">
+                    <a href={'/mods'}>
+                        <div className="cute-nav-item">
+                                My Mods
+                        </div>
+                    </a>
+                </div>
 
                 <div className={`status-container ${discordStatus}`}>
                     <div>
