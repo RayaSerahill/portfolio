@@ -286,8 +286,7 @@ section.social .socials-container .discord-container .discord-icon {
   display: flex;
   flex-wrap: wrap;
   width: calc(var(--hex-size) * 3 + var(--hex-gap) * 4);
-  margin: 0 auto;
-  margin-left: 25px;
+  margin: 0 auto 0 25px;
 }
 .hex-container .hex-item {
   height: 200px;
@@ -437,6 +436,25 @@ section.social .socials-container .discord-container .discord-icon {
   color: #b06b8c;
   font-style: italic;
   text-shadow: none;
+}
+
+.cute-nav {
+  margin-top: -45px;
+  float: right;
+  padding-right: 3rem;
+}
+.cute-nav .cute-nav-item {
+  padding: 5px 10px;
+  border: 2px dashed #ff9fc6;
+  border-radius: 20px;
+}
+.cute-nav .cute-nav-item:hover {
+  background-color: #ff9fc6;
+  color: white;
+  transition: background-color 0.2s, color 0.2s;
+  box-shadow: none;
+  text-shadow: none;
+  border: 2px dashed #ffffff;
 }
 
 @media (max-width: 640px) {
