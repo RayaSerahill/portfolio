@@ -290,7 +290,7 @@ section.social .socials-container .discord-container .discord-icon {
   margin-left: 25px;
 }
 .hex-container .hex-item {
-  height: calc(var(--s) * 1.1547);
+  height: 200px;
   display: inline-block;
   font-size: initial;
   clip-path: polygon(0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%, 50% 0%);
@@ -299,6 +299,12 @@ section.social .socials-container .discord-container .discord-icon {
   margin-bottom: calc(var(--m) - var(--s) * 0.2885);
   width: 160px;
   transition: transform 0.2s;
+}
+.hex-container .hex-item img {
+  width: unset;
+  margin-left: -20px;
+  height: 200px;
+  max-width: unset;
 }
 .hex-container .hex-item:hover {
   transform: translateY(-5px);
@@ -326,15 +332,18 @@ section.social .socials-container .discord-container .discord-icon {
 }
 
 .mods-modal-panel {
+  position: relative;
   width: 90%;
-  max-width: 480px;
-  padding: 2rem;
-  background: #1a1a1a;
-  border-radius: 12px;
+  max-width: 560px;
+  padding: 1rem 1rem 1.5rem;
+  background: linear-gradient(180deg, #fff7fb 0%, #fff 100%);
+  border: 2px solid rgba(255, 159, 198, 0.45);
+  border-radius: 24px;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
   opacity: 0;
   transform: translateY(20px) scale(0.97);
   transition: transform 300ms ease, opacity 300ms ease;
+  overflow: hidden;
 }
 .mods-modal-panel.visible {
   opacity: 1;
@@ -343,29 +352,107 @@ section.social .socials-container .discord-container .discord-icon {
 
 .mods-modal-image {
   width: 100%;
-  margin-bottom: 1rem;
-  border-radius: 8px;
+  max-height: 400px;
+  object-fit: cover;
+  object-position: center;
+  margin-bottom: 1.25rem;
+  border-radius: 16px;
+  background: #ffd7e7;
 }
 
 .mods-modal-title {
-  margin: 0 0 0.5rem;
+  margin: 0 0 0.75rem;
+  color: #ff7bb1;
+  font-size: 26px;
+  text-shadow: -1px -1px 0 #ffffff, 1px -1px 0 #ffffff, -1px 1px 0 #ffffff, 1px 1px 0 #ffffff;
+}
+
+.mods-modal-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.mods-modal-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.8rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff9fc6 0%, #ff6fa8 100%);
   color: #fff;
+  font-size: 0.8rem;
+  line-height: 1;
+  text-shadow: none;
+  box-shadow: 0 8px 18px rgba(255, 111, 168, 0.28);
 }
 
 .mods-modal-description {
   margin: 0;
-  color: #aaa;
+  color: #8a4a68;
   line-height: 1.6;
+  text-shadow: none;
 }
 
 .mods-modal-close {
-  margin-top: 1.5rem;
-  padding: 0.5rem 1.25rem;
-  border: none;
-  border-radius: 6px;
-  background: #333;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: 999px;
+  background: rgba(255, 111, 168, 0.92);
   color: #fff;
   cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  box-shadow: 0 10px 24px rgba(255, 111, 168, 0.25);
+}
+
+.mods-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-height: 2.75rem;
+  margin-top: 1.5rem;
+}
+
+.mods-modal-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.2rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff9fc6 0%, #ff6fa8 100%);
+  color: #fff;
+  font-family: font, serif;
+  text-decoration: none;
+  text-shadow: none;
+  box-shadow: 0 12px 28px rgba(255, 111, 168, 0.28);
+}
+
+.mods-modal-private {
+  margin: 0;
+  color: #b06b8c;
+  font-style: italic;
+  text-shadow: none;
+}
+
+@media (max-width: 640px) {
+  .mods-modal-panel {
+    width: calc(100% - 1.5rem);
+    padding: 0.75rem 0.75rem 1.25rem;
+  }
+  .mods-modal-image {
+    max-height: 280px;
+  }
+  .mods-modal-title {
+    font-size: 22px;
+  }
+  .mods-modal-actions {
+    justify-content: center;
+  }
 }
 
 /*# sourceMappingURL=neko.css.map */

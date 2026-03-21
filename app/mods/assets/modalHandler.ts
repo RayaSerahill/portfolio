@@ -4,8 +4,10 @@ export interface ModalItem {
   title: string;
   description: string;
   image?: string;
+  fullImage?: string;
   alt?: string;
   link?: string;
+  tags?: string[];
 }
 
 export function useModalHandler() {

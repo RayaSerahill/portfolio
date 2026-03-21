@@ -1,4 +1,4 @@
-import { useModalHandler, ModalItem } from "./modalHandler";
+import { ModalItem } from "./modalHandler";
 
 interface ModalProps {
   isOpen: boolean;
@@ -10,6 +10,8 @@ interface ModalProps {
 export function Modal({ isOpen, isVisible, activeItem, onClose }: ModalProps) {
   if (!isOpen || !activeItem) return null;
 
+  const hasLink = Boolean(activeItem.link);
+
   return (
     <div
       onClick={onClose}
@@ -19,21 +21,46 @@ export function Modal({ isOpen, isVisible, activeItem, onClose }: ModalProps) {
         onClick={(e) => e.stopPropagation()}
         className={`mods-modal-panel ${isVisible ? "visible" : ""}`}
       >
-        {activeItem.image && (
+        <button
+          onClick={onClose}
+          className="mods-modal-close"
+          aria-label="Close modal"
+          type="button"
+        >
+          x
+        </button>
+        {activeItem.fullImage && (
           <img
-            src={activeItem.image}
+            src={activeItem.fullImage}
             alt={activeItem.alt ?? activeItem.title}
             className="mods-modal-image"
           />
         )}
         <h2 className="mods-modal-title">{activeItem.title}</h2>
+        {activeItem.tags && activeItem.tags.length > 0 && (
+          <div className="mods-modal-tags">
+            {activeItem.tags.map((tag) => (
+              <span key={tag} className="mods-modal-tag">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
         <p className="mods-modal-description">{activeItem.description}</p>
-        <button
-          onClick={onClose}
-          className="mods-modal-close"
-        >
-          Close
-        </button>
+        <div className="mods-modal-actions">
+          {hasLink ? (
+            <a
+              href={activeItem.link}
+              target="_blank"
+              rel="noreferrer"
+              className="mods-modal-link"
+            >
+              View Mod
+            </a>
+          ) : (
+            <p className="mods-modal-private">(private commission)</p>
+          )}
+        </div>
       </div>
     </div>
   );

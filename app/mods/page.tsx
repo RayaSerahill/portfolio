@@ -1,15 +1,10 @@
 'use client';
 
-import {ReactNode, useEffect, useState} from "react";
 import "../neko/assets/css/neko.css";
 import hexItems from "./assets/modsList.json";
 import { useTooltip } from "./assets/tooltips";
 import { useModalHandler } from "./assets/modalHandler";
 import { Modal } from "./assets/modal";
-
-function isDivisibleByThree(n: number): string {
-  return n % 3 === 0 ? "true" : "false";
-}
 
 export default function ModsPage() {
 
@@ -23,7 +18,15 @@ export default function ModsPage() {
         <div className={"flex flex-col gap-4 mt-8 cute-border"}>
           <a className={"back-to-front"} href={"/"}> &lt;-- Back to front page</a>
           <div className={"hex-container"}>
-            {hexItems.reduce<{ title: string; description: string; image: string; alt: string; link: string }[][]>(
+            {hexItems.reduce<{
+              title: string;
+              description: string;
+              image: string;
+              fullImage?: string;
+              alt: string;
+              link?: string;
+              tags?: string[];
+            }[][]>(
               (rows, item, index) => {
                 if (index % 3 === 0) rows.push([]);
                 rows[rows.length - 1].push(item);
