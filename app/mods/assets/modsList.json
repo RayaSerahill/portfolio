@@ -3,8 +3,10 @@
     "title": "Eternity Collar",
     "description": "A simple eternity collar mod for all female races",
     "image": "/velvet/portfolio1.png",
+    "fullImage": "/velvet/portfolio1.png",
     "alt": "A simple eternity collar mod for all female races",
-    "link": ""
+    "link": "",
+    "tags": ["Accessory", "Female", "Eternity Collar"]
   },
   {
     "title": "Eternity Collar",
