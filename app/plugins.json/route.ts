@@ -21,6 +21,7 @@ type ProjectConfig = {
   loadPriority?: number;
   punchline?: string;
   acceptsFeedback?: boolean;
+  icon?: string;
 };
 
 const PROJECTS: ProjectConfig[] = [
@@ -42,6 +43,7 @@ const PROJECTS: ProjectConfig[] = [
     loadPriority: 0,
     punchline: "Automatically upload SBJ stast to the web interface",
     acceptsFeedback: true,
+    icon: "https://serahill.net/img/bdrp.png"
   },
   {
     owner: "RayaSerahill",
@@ -61,6 +63,7 @@ const PROJECTS: ProjectConfig[] = [
     loadPriority: 0,
     punchline: "Discord!",
     acceptsFeedback: true,
+    icon: "https://serahill.net/img/simplestats.png"
   },
 ];
 
@@ -129,6 +132,7 @@ async function buildProjectPayload(project: ProjectConfig) {
     LoadPriority: project.loadPriority ?? 0,
     Punchline: project.punchline ?? project.description,
     AcceptsFeedback: project.acceptsFeedback ?? true,
+    IconUrl: project.icon ?? false,
   };
 }
 
