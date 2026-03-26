@@ -109,7 +109,7 @@ export default function NekoPage() {
                     </div>
                 </div>
                 <section className={'dual-container'}>
-                    <img srcSet={'/img/sitting.png'} alt={'Raya Serahill'} className={'raya-pic'} />
+                    <img srcSet={'/img/color_nobg.webp'} alt={'Raya Serahill'} className={'raya-pic'} />
                     <div className={'pinkie right'}>
                         <h1>Raya Serahill</h1>
                         Heya! My name is Raya. I was born in 1999, however old that makes me you can do the math. I'm Finnish and a virgo, my pronouns are she/her. Just a girly with a passion to learn new things.
