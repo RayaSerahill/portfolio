@@ -41,9 +41,9 @@ const PROJECTS: ProjectConfig[] = [
     loadSync: false,
     canUnloadAsync: false,
     loadPriority: 0,
-    punchline: "Automatically upload SBJ stast to the web interface",
+    punchline: "Automatically upload SBJ stats to the web interface",
     acceptsFeedback: true,
-    icon: "https://serahill.net/img/bdrp.png"
+    icon: "https://serahill.net/img/simplestats.png"
   },
   {
     owner: "RayaSerahill",
@@ -63,7 +63,7 @@ const PROJECTS: ProjectConfig[] = [
     loadPriority: 0,
     punchline: "Discord!",
     acceptsFeedback: true,
-    icon: "https://serahill.net/img/simplestats.png"
+    icon: "https://serahill.net/img/bdrp.png"
   },
 ];
 
