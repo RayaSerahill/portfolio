@@ -33,7 +33,7 @@ const PROJECTS: ProjectConfig[] = [
     internalName: "SimpleStats",
     description: "Automatically upload SBJ stast to the web interface",
     tags: ["sample", "gamba", "sbj"],
-    dalamudApiLevel: 14,
+    dalamudApiLevel: 15,
     applicableVersion: "any",
     isHide: "False",
     isTestingExclusive: "False",
