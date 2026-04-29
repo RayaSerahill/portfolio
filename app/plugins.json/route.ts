@@ -53,7 +53,7 @@ const PROJECTS: ProjectConfig[] = [
     internalName: "BetterDiscordRichpresence",
     description: "Discord!",
     tags: ["Discord", "status", "Raya", "Serahill"],
-    dalamudApiLevel: 14,
+    dalamudApiLevel: 15,
     applicableVersion: "any",
     isHide: "False",
     isTestingExclusive: "False",
