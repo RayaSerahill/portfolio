@@ -47,10 +47,10 @@ const PROJECTS: ProjectConfig[] = [
   },
   {
     owner: "RayaSerahill",
-    repo: "BetterDiscordRichPresence",
+    repo: "BetterDiscordRichpresence",
     author: "Raya Serahill",
-    name: "BetterDiscordRichPresence",
-    internalName: "BetterDiscordRichPresence",
+    name: "BetterDiscordRichpresence",
+    internalName: "BetterDiscordRichpresence",
     description: "Discord!",
     tags: ["Discord", "status", "Raya", "Serahill"],
     dalamudApiLevel: 15,
