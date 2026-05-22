@@ -1,5 +1,32 @@
 [
   {
+    "title": "Leafeon Ears",
+    "description": "Cute little Leafeon accessories made for myself in my new eeveelution line of accessories :3",
+    "image": "/mods/leafeon.webp",
+    "fullImage": "/mods/leafeon.webp",
+    "alt": "Cute little Leafeon accessories made for myself in my new eeveelution line of accessories.",
+    "link": "",
+    "tags": ["Accessory", "Female", "Cute"]
+  },
+  {
+    "title": "Amaranthine",
+    "description": "Goth inspired ear piercings for Hyur! Made by me in 3 hours right after inspiration struck despite me never using Hyur myself",
+    "image": "/mods/Amaranthine.webp",
+    "fullImage": "/mods/Amaranthine.webp",
+    "alt": "Goth inspired ear piercings for Hyur! Made by me in 3 hours right after inspiration struck despite me never using Hyur myself.",
+    "link": "https://www.xivmodarchive.com/modid/161154",
+    "tags": ["Accessory", "Female", "goth", "punk"]
+  },
+  {
+    "title": "Couples Necklace",
+    "description": "A necklace with 2 versions for both sides of the couple! Simple and made into moon/sun theme as requested.",
+    "image": "/mods/lini.webp",
+    "fullImage": "/mods/lini.webp",
+    "alt": "A necklace with 2 versions for both sides of the couple! Simple and made into moon/sun theme as requested.",
+    "link": "",
+    "tags": ["Accessory", "Female", "Cute"]
+  },
+  {
     "title": "Anactoria",
     "description": "A cute solo sitting animation with hands adorably on your face.",
     "image": "/mods/anactoria.webp",
