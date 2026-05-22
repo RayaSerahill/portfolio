@@ -96,9 +96,9 @@ export default function NekoPage() {
         <>
             <div className="max-w-2xl mx-auto px-4 raya-container">
                 <div className="cute-nav">
-                    <a href={'/mods'}>
+                    <a href={'/portfolio'}>
                         <div className="cute-nav-item">
-                                My Mods
+                                Mods portfolio
                         </div>
                     </a>
                 </div>
