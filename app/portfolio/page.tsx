@@ -78,13 +78,26 @@ function tagClass(tag: string) {
   return tagClasses[tag.toLowerCase()] ?? "";
 }
 
+function statusClass(status: string | null) {
+  if (!status) return "";
+  return styles[status as keyof typeof styles] ?? "";
+}
+
+function StatusWidget({ status }: { status: string | null }) {
+  return (
+    <div className={`${styles.statusContainer} ${statusClass(status)}`} aria-label="Discord status">
+      <div>
+        <span className={styles.statusBall} />
+        <h3>I&apos;m currently {status ? `${status}` : ""}</h3>
+      </div>
+    </div>
+  );
+}
+
 function TopNav({ status }: { status: string | null }) {
   return (
     <div className={styles.topnav}>
-      <span className={styles.pill} aria-label="Discord status">
-        <span className={`${styles.dot} ${status ? styles[`status${status}` as keyof typeof styles] ?? "" : ""}`} />
-        <span>I&apos;m currently {status ?? "around"}</span>
-      </span>
+      <StatusWidget status={status} />
       <div className={styles.navLinks}>
         <Link className={styles.pill} href="/" aria-label="Back to home">
           <span aria-hidden>♡</span>

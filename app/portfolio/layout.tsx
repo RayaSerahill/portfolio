@@ -1,4 +1,11 @@
 import type { Metadata } from "next";
+import { Henny_Penny } from "next/font/google";
+
+const hennyPenny = Henny_Penny({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-portfolio-title",
+});
 
 export const metadata: Metadata = {
   title: "Raya Serahill - Portfolio",
@@ -44,5 +51,5 @@ export const metadata: Metadata = {
 };
 
 export default function PortfolioLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <div className={hennyPenny.variable}>{children}</div>;
 }
