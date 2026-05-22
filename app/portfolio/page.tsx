@@ -99,7 +99,7 @@ function Hero({ count }: { count: number }) {
   return (
     <section className={styles.hero}>
       <div className={styles.figure} aria-hidden="true">
-        <img src="/mods/gen.webp" alt="" fill sizes="(max-width: 720px) 100vw, 360px" className={styles.heroImage} priority />
+        <Image src="/mods/gen.webp" alt="" fill sizes="(max-width: 720px) 100vw, 360px" className={styles.heroImage} priority />
       </div>
       <div>
         <h1 className={styles.title}>Portfolio</h1>
