@@ -159,7 +159,7 @@ export default function NekoPage() {
                             <li><a href={'https://github.com/RayaSerahill/BetterDiscordRichpresence'}><span className={'animated-dotted-border'}>Better discord rich presence</span></a> - A FFXIV plugin to show your in game status on your discord activity :3</li>
                             <li><a href={'https://github.com/RayaSerahill/sbjstats'}><span className={'animated-dotted-border'}>Stats uploader</span></a> - Another FFXIV plugin, this one uploads blackjack stats from the game live to my website</li>
                             <li><a href={'https://www.xivmodarchive.com/user/299088'}><span className={'animated-dotted-border'}>XIV Mod Archive</span></a> - Some visual mods I have released publicly for FFXIV. Not all are public releases</li>
-                            <li><a href={'#'}><span className={'animated-dotted-border'}>Scripts</span></a> - A collection of small scripts and stuff for various purposes. Couple gems among the trash may exist</li>
+                            <li><a href={'https://serahill.net/partake-widget'}><span className={'animated-dotted-border'}>Partake widget</span></a> - A widget that allows FFXIV venues to showcase their newest events on their website with a simple customizable iframe</li>
                         </ul>
                     </div>
                     <img srcSet={'/img/standing.png'} alt={'Raya Serahill'} className={'raya-pic'} />
