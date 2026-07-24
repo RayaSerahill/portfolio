@@ -1,5 +1,32 @@
 [
   {
+    "title": "Last Threads",
+    "description": "A little ripped up top, still perfectly usable and covers the important bits",
+    "image": "/mods/last_threads.webp",
+    "fullImage": "/mods/last_threads.webp",
+    "alt": "A little ripped up top, still perfectly usable and covers the important bits",
+    "link": "",
+    "tags": ["Top", "Female", "blouse", "gear"]
+  },
+  {
+    "title": "Cicada Choker",
+    "description": "A witchy cicada and crescent moon adorned choker",
+    "image": "/mods/cicada.webp",
+    "fullImage": "/mods/cicada.webp",
+    "alt": "A witchy cicada and crescent moon adorned choker",
+    "link": "",
+    "tags": ["Accessory", "Female", "Choker"]
+  },
+  {
+    "title": "Pride Choker",
+    "description": "A choker with 14 different pride flag coloring options :3",
+    "image": "/mods/pride_choker.webp",
+    "fullImage": "/mods/pride_choker.webp",
+    "alt": "A choker with 14 different pride flag coloring options",
+    "link": "www.xivmodarchive.com/modid/162568",
+    "tags": ["Accessory", "Female", "Choker"]
+  },
+  {
     "title": "Leafeon Ears",
     "description": "Cute little Leafeon accessories made for myself in my new eeveelution line of accessories :3",
     "image": "/mods/leafeon.webp",
