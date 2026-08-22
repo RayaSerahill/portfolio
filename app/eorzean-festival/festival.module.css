@@ -268,24 +268,9 @@
   filter: drop-shadow(6px 8px 0 rgba(255, 254, 249, 0.75));
 }
 
-.sunMark,
-.sparkleOne,
-.flowerOne,
-.waveOne {
+.flowerOne {
   position: absolute;
   z-index: 0;
-}
-
-.sunMark {
-  top: 130px;
-  right: 9%;
-  color: #e39b00;
-}
-
-.sparkleOne {
-  top: 31%;
-  right: 46%;
-  color: var(--pink-dark);
 }
 
 .flowerOne {
@@ -296,12 +281,98 @@
   color: var(--white);
 }
 
-.waveOne {
-  right: 3%;
-  bottom: 6%;
-  width: 82px;
-  height: 82px;
+.animatedSky {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.animatedSun {
+  position: absolute;
+  top: 128px;
+  right: 9%;
+  color: #e39b00;
+  transform-origin: center;
+}
+
+.skyCloud {
+  position: absolute;
+  color: rgba(255, 254, 249, 0.55);
+  filter: drop-shadow(2px 2px 0 rgba(25, 107, 120, 0.14));
+}
+
+.skyCloud svg {
+  width: 100%;
+  height: 100%;
+  stroke-width: 1.25;
+}
+
+.cloudOne {
+  top: 21%;
+  left: 42%;
+  width: 118px;
+  height: 72px;
+}
+
+.cloudTwo {
+  right: 10%;
+  bottom: 18%;
+  width: 150px;
+  height: 92px;
+  color: rgba(255, 254, 249, 0.36);
+}
+
+.cloudThree {
+  top: 48%;
+  left: 4%;
+  width: 86px;
+  height: 53px;
+  color: rgba(255, 254, 249, 0.32);
+}
+
+.skySparkle {
+  position: absolute;
+  top: 31%;
+  right: 46%;
+  color: rgba(200, 61, 101, 0.72);
+}
+
+.skyWaves {
+  position: absolute;
+  right: 2%;
+  bottom: 5%;
+  display: flex;
   color: var(--aqua-dark);
+}
+
+.skyWaves svg {
+  width: 48px;
+  height: 48px;
+  margin-left: -13px;
+}
+
+.skyPetal {
+  position: absolute;
+  display: block;
+  width: 9px;
+  height: 16px;
+  border: 1px solid rgba(37, 49, 58, 0.22);
+  border-radius: 90% 0 90% 0;
+  opacity: 0.28;
+}
+
+.petalpink {
+  background: var(--pink);
+}
+
+.petalyellow {
+  background: var(--yellow);
+}
+
+.petalwhite {
+  background: var(--white);
 }
 
 .sectionInner {
@@ -928,16 +999,29 @@
     width: 100%;
   }
 
-  .sunMark {
+  .animatedSun {
     top: 113px;
     right: 5%;
   }
 
-  .sparkleOne,
+  .cloudThree,
+  .skySparkle,
+  .skyWaves,
   .flowerOne,
-  .waveOne,
   .heroNote {
     display: none;
+  }
+
+  .cloudOne {
+    top: 28%;
+    left: 68%;
+    width: 90px;
+  }
+
+  .cloudTwo {
+    right: 60%;
+    bottom: 24%;
+    width: 112px;
   }
 
   .sectionInner {

@@ -15,9 +15,9 @@ import {
   ShieldCheck,
   Sparkles,
   Sun,
-  Waves,
   Wrench,
 } from "lucide-react";
+import { FestivalSky } from "./FestivalSky";
 import styles from "./festival.module.css";
 
 const services = [
@@ -107,18 +107,14 @@ export default function EorzeanFestivalPage() {
       </header>
 
       <section className={styles.hero} id="top">
+        <FestivalSky />
         <div className={styles.bunting} aria-hidden="true">
           {Array.from({ length: 14 }, (_, index) => (
             <span key={index} />
           ))}
         </div>
 
-        <div className={styles.sunMark} aria-hidden="true">
-          <Sun size={76} strokeWidth={1.4} />
-        </div>
-        <Sparkles className={styles.sparkleOne} aria-hidden="true" />
         <Flower2 className={styles.flowerOne} aria-hidden="true" />
-        <Waves className={styles.waveOne} aria-hidden="true" />
 
         <Image
           className={styles.heroArtwork}
