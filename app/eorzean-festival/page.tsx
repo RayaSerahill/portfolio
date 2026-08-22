@@ -164,8 +164,7 @@ export default function EorzeanFestivalPage() {
             <h2>A developer for your very specific idea</h2>
             <p>
               You&apos;re bidding on my time and development experience, not a
-              mystery box. Bring the spark and we&apos;ll shape a practical scope
-              together before I start building.
+              mystery box. Bring your idea and we'll make a plan together before I start building.
             </p>
           </div>
 
@@ -252,18 +251,16 @@ export default function EorzeanFestivalPage() {
               <ul className={styles.featureList}>
                 <li>
                   <Box aria-hidden="true" size={19} />
-                  Search around 29,000 gear pieces, accessories, and body models,
-                  then preview them fully textured in 3D.
+                  Absolute live-editing that does not even require a click to see changes in game
                 </li>
                 <li>
                   <PackageOpen aria-hidden="true" size={19} />
                   Round-trip GLTF or FBX through Blender, edit materials and
-                  textures live, and export the result as a Penumbra mod.
+                  textures live, or export the result as a Penumbra mod.
                 </li>
                 <li>
                   <ShieldCheck aria-hidden="true" size={19} />
-                  Upgrade older TTMP and PMP packs while keeping the actual game
-                  installation strictly read-only.
+                  Upgrade or remap older TTMP and PMP packs to new items. Is updated to support all new penumbra features
                 </li>
               </ul>
               <div className={styles.tagRow} aria-label="Moonlace highlights">
