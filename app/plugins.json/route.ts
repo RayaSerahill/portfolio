@@ -65,6 +65,26 @@ const PROJECTS: ProjectConfig[] = [
     acceptsFeedback: true,
     icon: "https://serahill.net/img/bdrp.png"
   },
+  {
+    owner: "RayaSerahill",
+    repo: "EspiGamba_Helper",
+    author: "Raya Serahill",
+    name: "EspiGamba Helper",
+    internalName: "EspiGambaHelper",
+    description: "A plugin that contains simpple functions to help Espi Gamba Dealers",
+    tags: ["party", "alliance", "dice", "scratch"],
+    dalamudApiLevel: 15,
+    applicableVersion: "any",
+    isHide: "False",
+    isTestingExclusive: "False",
+    loadRequiredState: 0,
+    loadSync: false,
+    canUnloadAsync: false,
+    loadPriority: 0,
+    punchline: "A plugin that contains simpple functions to help Espi Gamba Dealers",
+    acceptsFeedback: true,
+    icon: "https://i.imgur.com/vcUCXsi.png"
+  },
 ];
 
 function normalizeVersion(tag: string) {
