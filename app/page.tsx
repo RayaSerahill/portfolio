@@ -1,188 +1,164 @@
-'use client';
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowUpRight } from "lucide-react";
+import styles from "./_front/front.module.css";
+import SocialLinks from "./_front/SocialLinks";
 
-import { useEffect, useRef, useState } from 'react';
-import "./neko/assets/css/neko.css";
-
-const socialLinks = [
+const projects = [
     {
-        href: 'https://www.instagram.com/raya_serahill/',
-        img: '/img/instagram.png',
-        alt: 'Instagram',
-        hover: 'Cute things, photos, and little glimpses into my world',
+        href: "https://github.com/RayaSerahill/Moonlace",
+        title: "Moonlace",
+        desc: "A Linux-first desktop app for browsing, previewing, and editing FFXIV models and Penumbra mods, on Linux and Windows",
     },
     {
-        href: 'mailto:rayaserahill@gmail.com',
-        img: '/img/email.png',
-        alt: 'Email',
-        hover: 'A bit slower than Discord, but still a way to reach me',
+        href: "https://serahill.net/stats/raya",
+        title: "BlackJack Stats",
+        desc: "A little page for me and a friend to display stats about our shared hobby of blackjack hosting",
     },
     {
-        href: 'https://github.com/RayaSerahill',
-        img: '/img/github.png',
-        alt: 'Github',
-        hover: 'Projects, experiments, and code goblins',
+        href: "https://github.com/RayaSerahill/BetterDiscordRichpresence",
+        title: "Better discord rich presence",
+        desc: "A FFXIV plugin to show your in game status on your discord activity :3",
+    },
+    {
+        href: "https://github.com/RayaSerahill/sbjstats",
+        title: "Stats uploader",
+        desc: "Another FFXIV plugin, this one uploads blackjack stats from the game live to my website",
+    },
+    {
+        href: "https://www.xivmodarchive.com/user/299088",
+        title: "XIV Mod Archive",
+        desc: "Some visual mods I have released publicly for FFXIV. Not all are public releases",
+    },
+    {
+        href: "https://serahill.net/partake-widget",
+        title: "Partake widget",
+        desc: "A widget that allows FFXIV venues to showcase their newest events on their website with a simple customizable iframe",
     },
 ];
 
-export default function NekoPage() {
-    const [tooltip, setTooltip] = useState({
-        visible: false,
-        text: '',
-        x: 0,
-        y: 0,
-    });
-
-    const tooltipRef = useRef<HTMLDivElement | null>(null);
-
-    const showTooltip = (text: string, e: React.MouseEvent<HTMLAnchorElement>) => {
-        setTooltip({
-            visible: true,
-            text,
-            x: e.clientX,
-            y: e.clientY,
-        });
-    };
-
-    const moveTooltip = (e: React.MouseEvent<HTMLAnchorElement>) => {
-        setTooltip((prev) => ({
-            ...prev,
-            x: e.clientX,
-            y: e.clientY,
-        }));
-    };
-
-    const hideTooltip = () => {
-        setTooltip((prev) => ({
-            ...prev,
-            visible: false,
-        }));
-    };
-
-    useEffect(() => {
-        const handleMouseMove = (e: MouseEvent) => {
-            setTooltip((prev) =>
-                prev.visible
-                    ? {
-                        ...prev,
-                        x: e.clientX,
-                        y: e.clientY,
-                    }
-                    : prev
-            );
-        };
-
-        window.addEventListener('mousemove', handleMouseMove);
-        return () => window.removeEventListener('mousemove', handleMouseMove);
-    }, []);
-
-    const [discordStatus, setDiscordStatus] = useState<string | null>(null);
-    async function getStatus(): Promise<string | null> {
-        try {
-            const res = await fetch("https://api.lanyard.rest/v1/users/140137510952108033");
-            const json = await res.json();
-            let status = json?.data?.discord_status ?? null;
-            if (status === "dnd") return "offline";
-            return status;
-        } catch {
-            return null;
-        }
-    }
-
-    useEffect(() => {
-        getStatus().then(setDiscordStatus);
-    }, []);
-
+function DiscordMark({ className }: { className?: string }) {
     return (
-        <>
-            <div className="max-w-2xl mx-auto px-4 raya-container">
-                <div className="cute-nav">
-                    <a href={'/portfolio'}>
-                        <div className="cute-nav-item">
-                                Mods portfolio
+        <svg viewBox="0 0 24 24" className={className} aria-hidden="true" focusable="false">
+            <path
+                fill="currentColor"
+                d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"
+            />
+        </svg>
+    );
+}
+
+export default function HomePage() {
+    return (
+        <div className={styles.root}>
+            <div className={styles.ambient} aria-hidden="true" />
+
+            <Link href="/" className={styles.wordmark}>
+                Raya
+            </Link>
+
+            <main>
+                <section className={styles.hero}>
+                    <div className={styles.heroText}>
+                        <p className={styles.eyebrow}>webmistress · developer · modder</p>
+                        <h1 className={styles.name}>Raya Serahill</h1>
+                        <p className={styles.lede}>
+                            Heya! My name is Raya. Born in 1999, Finnish, a virgo, <em>she/her</em>.
+                            Just a girly with a passion to learn new things.
+                        </p>
+                        <p>
+                            I’m the webmistress of this website. This page is a small profile with links to my
+                            other projects and pages. I have a lot of hobbies and interests, but the ones I want
+                            to share here are modeling, video games, and programming. I also have a soft spot for
+                            cute things.
+                        </p>
+                        <p>
+                            I’m a website developer by profession, and everything else I do is just hobbies for
+                            fun. I do try to keep myself busy with things I enjoy :3
+                        </p>
+                        <div className={styles.ctas}>
+                            <a href="/portfolio" className={styles.btnPrimary}>
+                                Mods portfolio <ArrowUpRight size={16} />
+                            </a>
+                            <a href="#socials" className={styles.btnGhost}>
+                                Say hi
+                            </a>
                         </div>
-                    </a>
-                </div>
-
-                <div className={`status-container ${discordStatus}`}>
-                    <div>
-                        <div className={"status-ball"}></div><h3>I'm currently  {discordStatus ? `${discordStatus}` : ''}</h3>
-                    </div>
-                </div>
-                <section className={'dual-container'}>
-                    <img srcSet={'/img/color_nobg.webp'} alt={'Raya Serahill'} className={'raya-pic'} />
-                    <div className={'pinkie right'}>
-                        <h1>Raya Serahill</h1>
-                        Heya! My name is Raya. I was born in 1999, however old that makes me you can do the math. I'm Finnish and a virgo, my pronouns are she/her. Just a girly with a passion to learn new things.
-                        <br /><br />
-                        I'm the webmistress of this website. This page is a small profile with links to my other projects and pages. I have a lot of hobbies and interests, but the ones that I want to share here are modeling, video games, and programming. I also have a soft spot for cute things.
-                        <br /><br />
-                        I am a website developer by profession, and everything else I do is just hobbies for fun, I do try to keep myself busy with things I enjoy :3
                     </div>
 
+                    <div className={styles.heroArt}>
+                        <Image
+                            src="/img/ah.png"
+                            alt="Raya Serahill: pink-haired catgirl in black lace and chains, looking down at the camera"
+                            width={1024}
+                            height={1536}
+                            priority
+                            quality={90}
+                            sizes="(max-width: 900px) 100vw, 45vw"
+                            className={styles.art}
+                        />
+                    </div>
                 </section>
 
-                <section className={'social'}>
-                    <div className={'soc-head'} style={{ backgroundImage: "url('/img/noise.png')" }}>
-                        <h2> Socials </h2>
+                <section id="socials" className={styles.section}>
+                    <div className={styles.sectionHead}>
+                        <p className={styles.overline}>Where to find me</p>
+                        <h2 className={styles.h2}>Socials</h2>
                     </div>
-                    <div className={'socials-container'}>
-                        <div className={'social-left'}>
-                            {socialLinks.map((item) => (
-                                <a
-                                    key={item.href}
-                                    href={item.href}
-                                    onMouseEnter={(e) => showTooltip(item.alt + " - " + item.hover, e)}
-                                    onMouseMove={moveTooltip}
-                                    onMouseLeave={hideTooltip}
-                                >
-                                    <img srcSet={item.img} alt={item.alt} className={'social-icon'} />
-                                </a>
-                            ))}
-                        </div>
-                        <div className={'social-right'}>
-                            <div className={'discord-container'}>
-                                <img srcSet={'/img/discord.png'} alt={'Discord'} className={'discord-icon'} />
-                                <h3>Raya</h3>
+
+                    <div className={styles.socialsGrid}>
+                        <SocialLinks />
+
+                        <aside className={styles.discordCard}>
+                            <div className={styles.discordHandle}>
+                                <DiscordMark className={styles.discordMark} />
+                                <div>
+                                    <strong>Raya</strong>
+                                    <br />
+                                    <span>on Discord</span>
+                                </div>
                             </div>
                             <h3>Important!</h3>
-                            <br />
-                            I use discord mostly, so if you want to reach out to me, that's the best way to do it. I also have an email, but I don't check it as often. Github is where I post my projects and Instagram is for fun and cute things.
-                        </div>
+                            <p>
+                                I use Discord mostly, so if you want to reach out to me, that’s the best way to do
+                                it. I also have an email, but I don’t check it as often. Github is where I post my
+                                projects and Instagram is for fun and cute things.
+                            </p>
+                        </aside>
                     </div>
                 </section>
 
-                <section className={'dual-container'}>
-                    <div className={'pinkie left'}>
-                        <h1>Projects</h1>
-                        <ul className={'project-list'}>
-                            <li><a href={'https://serahill.net/stats/raya'} datatype={'test'}><span className={'animated-dotted-border'}>BlackJack Stats</span></a> - A little page for me and a friend to display stats about our shared hobby of blackjack hosting</li>
-                            <li><a href={'https://github.com/RayaSerahill/BetterDiscordRichpresence'}><span className={'animated-dotted-border'}>Better discord rich presence</span></a> - A FFXIV plugin to show your in game status on your discord activity :3</li>
-                            <li><a href={'https://github.com/RayaSerahill/sbjstats'}><span className={'animated-dotted-border'}>Stats uploader</span></a> - Another FFXIV plugin, this one uploads blackjack stats from the game live to my website</li>
-                            <li><a href={'https://www.xivmodarchive.com/user/299088'}><span className={'animated-dotted-border'}>XIV Mod Archive</span></a> - Some visual mods I have released publicly for FFXIV. Not all are public releases</li>
-                            <li><a href={'https://serahill.net/partake-widget'}><span className={'animated-dotted-border'}>Partake widget</span></a> - A widget that allows FFXIV venues to showcase their newest events on their website with a simple customizable iframe</li>
-                        </ul>
+                <section id="projects" className={styles.section}>
+                    <div className={styles.sectionHead}>
+                        <p className={styles.overline}>Things I’ve built</p>
+                        <h2 className={styles.h2}>Projects</h2>
                     </div>
-                    <img srcSet={'/img/standing.png'} alt={'Raya Serahill'} className={'raya-pic'} />
-                </section>
 
-                <section className={'footer'}>
-                    <div>
-                        <p>
-                            Personally made by me &copy; 2026 Raya
-                        </p>
-                    </div>
+                    <ul className={styles.projectList}>
+                        {projects.map((p) => (
+                            <li key={p.href}>
+                                <a
+                                    href={p.href}
+                                    className={styles.project}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    <span>
+                                        <span className={styles.projectTitle}>{p.title}</span>
+                                        <span className={styles.projectDesc}>{p.desc}</span>
+                                    </span>
+                                    <ArrowUpRight size={20} className={styles.projectArrow} />
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
                 </section>
-            </div>
+            </main>
 
-            <div
-                className={`social-hover-popup ${tooltip.visible ? 'visible' : ''}`}
-                style={{
-                    left: tooltip.x + 18,
-                    top: tooltip.y + 18,
-                }}
-            >
-                {tooltip.text}
-            </div>
-        </>
+            <footer className={styles.footer}>
+                <div className={styles.prideLine} aria-hidden="true" />
+                <p>Personally made by me &copy; 2026 Raya</p>
+            </footer>
+        </div>
     );
 }

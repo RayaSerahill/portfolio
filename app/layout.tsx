@@ -58,7 +58,7 @@ export const metadata: Metadata = {
 
     other: {
         "discord:creator": "@raya",
-        "theme-color": "#ff69b4",
+        "theme-color": "#d8767f",
     },
 };
 

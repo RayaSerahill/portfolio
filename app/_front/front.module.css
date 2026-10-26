@@ -1,0 +1,625 @@
+/* ------------------------------------------------------------------ */
+/*  Night front page — palette lifted from /img/ah.png                 */
+/*  darks: #0a0708 #120f0e #1c1516  ·  wine: #5e3a38 #a45355           */
+/*  pinks: #d8767f #e99d96 #f0ada7  ·  silver (chains): #c9c6cc        */
+/* ------------------------------------------------------------------ */
+
+.root {
+  --ink: #0a0708;
+  --ink-2: #120f0e;
+  --ink-3: #1c1516;
+  --wine: #5e3a38;
+  --rose: #a45355;
+  --pink: #d8767f;
+  --pink-2: #e99d96;
+  --blush: #f0ada7;
+  --silver: #c9c6cc;
+  --text: #efe6e4;
+  --muted: #a8999b;
+  --nav-h: 64px;
+
+  position: relative;
+  min-height: 100svh;
+  background: var(--ink);
+  color: var(--text);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.65;
+  overflow-x: clip;
+  isolation: isolate;
+}
+
+:global(html):has(.root),
+:global(body):has(.root) {
+  background: #0a0708;
+  color-scheme: dark;
+}
+
+.root ::selection {
+  background: rgba(216, 118, 127, 0.45);
+  color: #fff4f2;
+}
+
+.root a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.root :where(a, button):focus-visible {
+  outline: 2px solid var(--pink-2);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* ---------- ambient background ---------- */
+
+.ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(60% 50% at 78% 22%, rgba(164, 83, 85, 0.22), transparent 70%),
+    radial-gradient(40% 40% at 10% 90%, rgba(94, 58, 56, 0.25), transparent 70%),
+    linear-gradient(180deg, #0a0708 0%, #0c0809 60%, #0a0708 100%);
+}
+
+.ambient::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("/img/noise.png");
+  background-size: 180px 180px;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+}
+
+/* ---------- fixed wordmark ---------- */
+
+.wordmark {
+  position: fixed;
+  top: 18px;
+  left: clamp(1rem, 4vw, 2.5rem);
+  z-index: 50;
+  font-family: "Old London", "Cormorant Garamond", serif;
+  font-size: 1.75rem;
+  line-height: 1;
+  color: var(--blush);
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 18px rgba(216, 118, 127, 0.45);
+}
+
+/* ---------- hero ---------- */
+
+.hero {
+  position: relative;
+  max-width: 1600px;
+  margin: 0 auto;
+  min-height: 100svh;
+  padding-top: var(--nav-h);
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  align-items: end;
+}
+
+.heroText {
+  align-self: center;
+  max-width: 640px;
+  padding: clamp(2rem, 6vh, 5rem) clamp(1rem, 3vw, 2.5rem) clamp(2rem, 6vh, 5rem) clamp(1rem, 6vw, 6rem);
+  position: relative;
+  z-index: 2;
+}
+
+.eyebrow {
+  margin: 0 0 1rem;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--silver);
+  opacity: 0.75;
+}
+
+.name {
+  margin: 0 0 1.25rem;
+  font-family: "Old London", "Cormorant Garamond", serif;
+  font-weight: 400;
+  font-size: clamp(3.4rem, 8.5vw, 6.2rem);
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+  color: var(--blush);
+  background: linear-gradient(135deg, #fff1ee 0%, var(--blush) 35%, var(--pink) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 22px rgba(216, 118, 127, 0.35));
+}
+
+.lede {
+  margin: 0 0 1rem;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.35rem;
+  line-height: 1.45;
+  color: #f7ecea;
+}
+
+.heroText p:not(.lede):not(.eyebrow) {
+  margin: 0 0 1rem;
+  color: var(--muted);
+  font-size: 0.98rem;
+}
+
+.heroText em {
+  color: var(--blush);
+  font-style: normal;
+}
+
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.btnPrimary,
+.btnGhost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.35rem;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.btnPrimary {
+  color: #1a0d0f;
+  background: linear-gradient(135deg, var(--pink-2) 0%, var(--pink) 100%);
+  box-shadow: 0 10px 30px rgba(216, 118, 127, 0.28);
+}
+
+.btnPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(216, 118, 127, 0.42);
+}
+
+.btnGhost {
+  color: var(--text);
+  border: 1px dashed rgba(201, 198, 204, 0.45);
+  background: rgba(18, 15, 14, 0.4);
+}
+
+.btnGhost:hover {
+  border-color: var(--pink);
+  color: var(--blush);
+  transform: translateY(-2px);
+}
+
+/* the art: free-floating figure, glow bleeds out past its bounds */
+
+.heroArt {
+  position: relative;
+  height: calc(100svh - var(--nav-h));
+  min-height: 540px;
+  padding-top: 1.5rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1;
+}
+
+.heroArt::before {
+  content: "";
+  position: absolute;
+  inset: 2% -25% -12% -25%;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 42% 38% at 50% 40%, rgba(240, 173, 167, 0.55) 0%, rgba(216, 118, 127, 0.38) 35%, rgba(164, 83, 85, 0.2) 60%, transparent 78%);
+  filter: blur(28px);
+  animation: breathe 7s ease-in-out infinite;
+}
+
+.heroArt::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -3%;
+  height: 14%;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 0%, rgba(216, 118, 127, 0.3), transparent 70%);
+  filter: blur(6px);
+}
+
+.art {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  filter:
+    drop-shadow(0 0 26px rgba(216, 118, 127, 0.28))
+    drop-shadow(0 28px 44px rgba(0, 0, 0, 0.65));
+}
+
+/* ---------- sections ---------- */
+
+.section {
+  position: relative;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: clamp(3.5rem, 9vh, 6.5rem) clamp(1rem, 5vw, 2.5rem);
+}
+
+.sectionHead {
+  margin-bottom: 2.25rem;
+}
+
+.overline {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--silver);
+  opacity: 0.65;
+}
+
+.h2 {
+  margin: 0;
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-weight: 500;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  line-height: 1.1;
+  color: var(--blush);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.h2::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  max-width: 220px;
+  background: repeating-linear-gradient(to right, rgba(201, 198, 204, 0.45) 0 4px, transparent 4px 9px);
+}
+
+/* socials */
+
+.socialsGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: clamp(1.5rem, 4vw, 3.5rem);
+  align-items: start;
+}
+
+.socialList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.socialLink {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 1rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 16px;
+  transition: background-color 0.2s ease;
+}
+
+.socialLink:hover {
+  background: rgba(28, 21, 22, 0.7);
+}
+
+.socialIcon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px dashed rgba(201, 198, 204, 0.4);
+  color: var(--pink-2);
+  background: rgba(18, 15, 14, 0.6);
+  transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.socialLink:hover .socialIcon {
+  border-style: solid;
+  border-color: var(--pink);
+  color: var(--blush);
+  box-shadow: 0 0 22px rgba(216, 118, 127, 0.35);
+  animation: iconTilt 0.5s ease forwards;
+}
+
+.socialName {
+  display: block;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.socialHint {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.discordCard {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border-radius: 22px;
+  border: 1px solid rgba(201, 198, 204, 0.12);
+  background: linear-gradient(160deg, rgba(28, 21, 22, 0.92) 0%, rgba(18, 15, 14, 0.92) 100%);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.discordCard::before {
+  content: "";
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  top: -140px;
+  right: -90px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(216, 118, 127, 0.35), transparent 70%);
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+.discordHandle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.discordMark {
+  width: 36px;
+  height: 36px;
+  color: var(--pink-2);
+  transform: rotate(-12deg);
+  filter: drop-shadow(0 0 10px rgba(216, 118, 127, 0.45));
+}
+
+.discordHandle strong {
+  font-family: "Cormorant Garamond", Georgia, serif;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--blush);
+}
+
+.discordHandle span {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--silver);
+  opacity: 0.7;
+}
+
+.discordCard h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--pink-2);
+}
+
+.discordCard p {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* projects */
+
+.projectList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px dashed rgba(201, 198, 204, 0.18);
+}
+
+.project {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.15rem 0.75rem;
+  border-bottom: 1px dashed rgba(201, 198, 204, 0.18);
+  position: relative;
+  transition: background-color 0.2s ease, padding-left 0.2s ease;
+}
+
+.project::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 18%;
+  bottom: 18%;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--pink);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.project:hover {
+  background: rgba(28, 21, 22, 0.55);
+  padding-left: 1.1rem;
+}
+
+.project:hover::before {
+  opacity: 1;
+}
+
+.projectTitle {
+  font-weight: 700;
+  color: var(--blush);
+  position: relative;
+  width: fit-content;
+}
+
+.projectTitle::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 2px;
+  background: repeating-linear-gradient(to right, var(--pink) 0 1px, transparent 1px 4px);
+  animation: dottedSlide 2s linear infinite;
+}
+
+.projectDesc {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.projectArrow {
+  color: var(--silver);
+  opacity: 0.6;
+  transition: transform 0.2s ease, opacity 0.2s ease, color 0.2s ease;
+}
+
+.project:hover .projectArrow {
+  transform: translate(3px, -3px);
+  opacity: 1;
+  color: var(--pink-2);
+}
+
+/* ---------- tooltip ---------- */
+
+.tooltip {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  max-width: 260px;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid rgba(216, 118, 127, 0.55);
+  border-radius: 12px;
+  background: rgba(18, 15, 14, 0.94);
+  color: var(--blush);
+  font-size: 0.82rem;
+  line-height: 1.4;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55), 0 0 18px rgba(216, 118, 127, 0.18);
+  opacity: 0;
+  transform: translateY(8px) scale(0.96);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  backdrop-filter: blur(6px);
+}
+
+.tooltipVisible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* ---------- footer ---------- */
+
+.footer {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 2.5rem clamp(1rem, 5vw, 2.5rem) 3rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.prideLine {
+  height: 2px;
+  width: min(220px, 60%);
+  margin: 0 auto 1.25rem;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #d52d00, #ff9a56, #ffffff, #d362a4, #a30262);
+  opacity: 0.55;
+}
+
+.footer a {
+  color: var(--blush);
+}
+
+/* ---------- motion ---------- */
+
+@keyframes dottedSlide {
+  from { background-position: 0 0; }
+  to { background-position: 8px 0; }
+}
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.04); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
+@keyframes iconTilt {
+  0% { transform: rotate(0deg); }
+  30% { transform: rotate(-6deg); }
+  70% { transform: rotate(10deg); }
+  100% { transform: rotate(14deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heroArt::before,
+  .projectTitle::after,
+  .socialLink:hover .socialIcon {
+    animation: none;
+  }
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    align-items: start;
+  }
+
+  .heroArt {
+    order: -1;
+    height: min(72svh, 640px);
+    min-height: 380px;
+    padding-top: 1rem;
+  }
+
+  .heroArt::before {
+    inset: 0 -10% -10% -10%;
+  }
+
+  .heroText {
+    max-width: none;
+    padding: 1.5rem clamp(1rem, 5vw, 2rem) 3rem;
+  }
+
+  .socialsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .wordmark {
+    font-size: 1.5rem;
+  }
+
+  .name {
+    font-size: clamp(3rem, 14vw, 4.2rem);
+  }
+
+  .socialLink {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+}
