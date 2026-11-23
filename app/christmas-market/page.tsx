@@ -11,6 +11,7 @@ import {
   metals,
   type MetalId,
 } from "./Illustrations";
+import { NecklaceViewer } from "./NecklaceViewer";
 import { Snowfall, WinterScene } from "./WinterScene";
 import styles from "./market.module.css";
 
@@ -96,16 +97,17 @@ export default function ChristmasMarketPage() {
       </header>
 
       {/*
-        Header stage, left empty on purpose for now.
-        Drop the model viewer into viewerSlot (it gets the moon ring behind it) and the
-        combination buttons into controlsSlot. Once controlsSlot has children it becomes a
-        column beside the viewer on desktop and stacks underneath on small screens.
+        Header stage. The necklace viewer sits in viewerSlot with the moon ring behind it.
+        controlsSlot is still empty: once it has children (the combination buttons) it becomes
+        a column beside the viewer on desktop and stacks underneath on small screens.
       */}
       <section className={styles.hero}>
         <WinterScene />
         <div className={styles.garland} aria-hidden="true" />
         <div className={styles.stage}>
-          <div className={styles.viewerSlot} />
+          <div className={styles.viewerSlot}>
+            <NecklaceViewer />
+          </div>
           <div className={styles.controlsSlot} />
         </div>
       </section>
