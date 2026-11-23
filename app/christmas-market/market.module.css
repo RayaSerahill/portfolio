@@ -166,6 +166,40 @@
   transform: translate(-50%, -50%);
 }
 
+/* the canvas reaches past the moon ring, so the necklace can be bigger than the ring itself */
+.viewer {
+  position: absolute;
+  inset: -64px 0;
+}
+
+.viewer canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  animation: viewerIn 700ms ease both;
+}
+
+.viewer canvas:focus-visible {
+  border-radius: 14px;
+  outline: 2px solid #ffd6e2;
+  outline-offset: 2px;
+}
+
+.viewerNote {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  margin: 0;
+  padding: 0 1rem;
+  place-items: center;
+  color: #ffe9f0;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-align: center;
+  pointer-events: none;
+}
+
 .controlsSlot {
   display: flex;
   flex-direction: column;
@@ -933,6 +967,12 @@
   }
 }
 
+@keyframes viewerIn {
+  from {
+    opacity: 0;
+  }
+}
+
 @keyframes twinkle {
   0%,
   100% {
@@ -972,6 +1012,7 @@
 
   .garland::before,
   .garland::after,
+  .viewer canvas,
   .baubleItem:hover .hang {
     animation: none;
   }
