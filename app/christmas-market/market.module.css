@@ -200,6 +200,64 @@
   pointer-events: none;
 }
 
+/* model picker: over the left edge of the viewer, level with the middle of the moon */
+.modelPicker {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transform: translateY(-50%);
+}
+
+.modelButton {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 1.35rem 0.55rem 1.1rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--pink);
+  box-shadow: 4px 4px 0 #ffd6e2;
+  color: var(--night);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  animation: viewerIn 700ms ease both;
+}
+
+/* switched on, it stays pushed in and turns pale */
+.modelButton[aria-pressed="true"] {
+  background: var(--snow);
+  box-shadow: 1px 1px 0 var(--pink);
+  transform: translate(3px, 3px);
+}
+
+.modelButton[aria-busy="true"] {
+  cursor: progress;
+}
+
+.modelButton:focus-visible {
+  outline: 2px solid #ffd6e2;
+  outline-offset: 4px;
+}
+
+/* only where a pointer can really hover, so the look does not stick after a tap */
+@media (hover: hover) {
+  .modelButton:hover {
+    box-shadow: 1px 1px 0 #ffd6e2;
+    transform: translate(3px, 3px);
+  }
+
+  .modelButton[aria-pressed="true"]:hover {
+    box-shadow: 1px 1px 0 var(--pink);
+  }
+}
+
 .controlsSlot {
   display: flex;
   flex-direction: column;
@@ -1017,8 +1075,13 @@
     animation: none;
   }
 
-  .button {
+  .button,
+  .modelButton {
     transition: none;
+  }
+
+  .modelButton {
+    animation: none;
   }
 }
 
@@ -1042,6 +1105,13 @@
 @media (max-width: 720px) {
   .nav {
     display: none;
+  }
+
+  /* no room beside the moon here, so the picker drops to the corner under it */
+  .modelPicker {
+    top: auto;
+    bottom: -52px;
+    transform: none;
   }
 
   .pieceGrid,
