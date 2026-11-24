@@ -2,8 +2,8 @@
   All the three.js for the header's necklace viewer. Kept free of React and loaded with a
   dynamic import, so three.js only downloads on this page and only after the page is up.
 
-  The model comes from scripts/pmp-to-glb.mjs. Its nodes are named after the .mdl meshes:
-  mesh0 is the text, mesh1 the symbol, mesh2 and mesh3 the chain.
+  The models come from scripts/pmp-to-glb.mjs, which names their nodes after the .mdl meshes.
+  Each one is only downloaded when it is first shown.
 */
 
 import {
@@ -38,23 +38,21 @@ const START_PITCH = 0.26;
 const PITCH_RANGE = [-0.2, 0.75] as const;
 const FRAMED_PITCH = 0.55; // the framing leaves room to tilt this far before anything gets cut off
 
-const HEART = "mesh1";
-
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
 /*
-  A thin film over the heart's metal, so it shimmers through pastels as it turns. Two things
-  make the colours show. The film gets thicker from one corner of the heart to the other,
+  A thin film over a charm's metal, so it shimmers through pastels as it turns. Two things
+  make the colours show. The film gets thicker from one corner of the charm to the other,
   which spreads them into bands; at one thickness a flat face is a single flat tint. And the
-  heart's pure white is toned down a little, because over a perfect mirror they cancel out.
+  metal's pure white is toned down a little, because over a perfect mirror they cancel out.
 */
-function makeIridescent(heart: Mesh) {
-  /* the model has no texture coordinates, so lay one axis diagonally across the heart */
-  const position = heart.geometry.getAttribute("position");
+function makeIridescent(charm: Mesh) {
+  /* the models have no texture coordinates, so lay one axis diagonally across the charm */
+  const position = charm.geometry.getAttribute("position");
   const along = Array.from({ length: position.count }, (_, i) => position.getX(i) + position.getY(i));
   const low = Math.min(...along);
   const span = Math.max(...along) - low || 1;
-  heart.geometry.setAttribute("uv", new Float32BufferAttribute(along.flatMap((value) => [(value - low) / span, 0.5]), 2));
+  charm.geometry.setAttribute("uv", new Float32BufferAttribute(along.flatMap((value) => [(value - low) / span, 0.5]), 2));
 
   /* film thickness is read from the green channel: a plain ramp from thinnest to thickest */
   const ramp = new Uint8Array(256 * 4);
@@ -63,7 +61,7 @@ function makeIridescent(heart: Mesh) {
   thickness.minFilter = thickness.magFilter = LinearFilter;
   thickness.needsUpdate = true;
 
-  const metal = heart.material as MeshStandardMaterial;
+  const metal = charm.material as MeshStandardMaterial;
   const film = new MeshPhysicalMaterial({
     color: "#e6e6e6",
     metalness: metal.metalness,
@@ -75,8 +73,47 @@ function makeIridescent(heart: Mesh) {
     iridescenceThicknessMaximum: 450,
   });
   film.addEventListener("dispose", () => thickness.dispose());
-  heart.material = film;
+  charm.material = film;
   metal.dispose();
+}
+
+/*
+  Black metal: dark, but still bright enough in the reflections to read as metal. The puppy's
+  chain and text share one material in the model, so both calls land on the same one.
+*/
+function makeBlackMetal(part: Mesh) {
+  const metal = part.material as MeshStandardMaterial;
+  metal.color.set("#4a4450");
+  metal.metalness = 1;
+  metal.roughness = 0.24;
+}
+
+/*
+  The models the viewer can show. `finishes` are the looks set here instead of by the mod:
+  its materials cannot describe a thin film, and the puppy's chain and text material is
+  still an untouched default.
+*/
+export type ModelId = "necklace" | "puppy";
+
+const MODELS: Record<ModelId, { source: string; finishes: Record<string, (mesh: Mesh) => void> }> = {
+  /* mesh0 is the text, mesh1 the heart, mesh2 and mesh3 the chain */
+  necklace: { source: "/christmas-market/necklace.glb", finishes: { mesh1: makeIridescent } },
+  /* mesh0 is the text, mesh1 the bone, mesh2 the chain */
+  puppy: {
+    source: "/christmas-market/puppy.glb",
+    finishes: { mesh0: makeBlackMetal, mesh1: makeIridescent, mesh2: makeBlackMetal },
+  },
+};
+
+/* a model that is ready to show: centred on the turntable and measured for framing */
+type Loaded = { model: Group; reach: number; rise: number };
+
+function discard(model: Group) {
+  model.traverse((object) => {
+    if (!(object instanceof Mesh)) return;
+    object.geometry.dispose();
+    (Array.isArray(object.material) ? object.material : [object.material]).forEach((material: Material) => material.dispose());
+  });
 }
 
 /*
@@ -127,9 +164,13 @@ function pinkWinterEnvironment(renderer: WebGLRenderer) {
   return target;
 }
 
-export type NecklaceViewer = { dispose(): void };
+export type NecklaceViewer = {
+  /* swaps in another model, keeping the current turn and tilt; settles once it is on screen */
+  show(id: ModelId): Promise<void>;
+  dispose(): void;
+};
 
-export async function mountNecklace(container: HTMLElement, source: string): Promise<NecklaceViewer> {
+export async function mountNecklace(container: HTMLElement, first: ModelId): Promise<NecklaceViewer> {
   const renderer = new WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.toneMapping = NeutralToneMapping;
@@ -158,8 +199,10 @@ export async function mountNecklace(container: HTMLElement, source: string): Pro
   tilt.add(spin);
   scene.add(tilt);
 
-  let reach = 1; // furthest the necklace gets from its turning axis
+  let reach = 1; // furthest the shown necklace gets from its turning axis
   let rise = 1; // half its height
+  let shown: Loaded | null = null;
+  let request = 0; // goes up with every show(), so a slow download cannot replace a newer pick
   let frame = 0;
   let disposed = false;
   let onScreen = true;
@@ -263,33 +306,57 @@ export async function mountNecklace(container: HTMLElement, source: string): Pro
 
   const loader = new GLTFLoader();
   loader.setMeshoptDecoder(MeshoptDecoder);
-  const gltf = await loader.loadAsync(source).catch((error: unknown) => {
+  const loading = new Map<ModelId, Promise<Loaded>>();
+
+  function load(id: ModelId) {
+    let pending = loading.get(id);
+    if (pending) return pending;
+
+    pending = loader.loadAsync(MODELS[id].source).then((gltf) => {
+      const model = gltf.scene;
+      for (const [name, finish] of Object.entries(MODELS[id].finishes)) {
+        const mesh = model.getObjectByName(name);
+        if (mesh instanceof Mesh) finish(mesh);
+      }
+
+      model.updateMatrixWorld(true);
+      const bounds = new Box3().setFromObject(model);
+      const centre = bounds.getCenter(new Vector3());
+      const point = new Vector3();
+      let reach = 0;
+      model.traverse((object) => {
+        if (!(object instanceof Mesh)) return;
+        const position = object.geometry.getAttribute("position");
+        for (let i = 0; i < position.count; i++) {
+          point.fromBufferAttribute(position, i).applyMatrix4(object.matrixWorld).sub(centre);
+          reach = Math.max(reach, Math.hypot(point.x, point.z));
+        }
+      });
+      model.position.sub(centre);
+      return { model, reach, rise: (bounds.max.y - bounds.min.y) / 2 };
+    });
+    /* a download that failed is forgotten, so asking again tries again */
+    pending.catch(() => loading.delete(id));
+    loading.set(id, pending);
+    return pending;
+  }
+
+  async function show(id: ModelId) {
+    const ticket = ++request;
+    const next = await load(id);
+    if (disposed || ticket !== request) return;
+    if (shown) spin.remove(shown.model);
+    spin.add(next.model);
+    shown = next;
+    ({ reach, rise } = next);
+    resize();
+  }
+
+  await show(first).catch((error: unknown) => {
     environment.dispose();
     renderer.dispose();
     throw error;
   });
-
-  const model = gltf.scene;
-  const heart = model.getObjectByName(HEART);
-  if (heart instanceof Mesh) makeIridescent(heart);
-
-  /* centre the necklace on the turntable and measure it for framing */
-  model.updateMatrixWorld(true);
-  const bounds = new Box3().setFromObject(model);
-  const centre = bounds.getCenter(new Vector3());
-  const point = new Vector3();
-  reach = 0;
-  model.traverse((object) => {
-    if (!(object instanceof Mesh)) return;
-    const position = object.geometry.getAttribute("position");
-    for (let i = 0; i < position.count; i++) {
-      point.fromBufferAttribute(position, i).applyMatrix4(object.matrixWorld).sub(centre);
-      reach = Math.max(reach, Math.hypot(point.x, point.z));
-    }
-  });
-  rise = (bounds.max.y - bounds.min.y) / 2;
-  model.position.sub(centre);
-  spin.add(model);
 
   canvas.style.cursor = "grab";
   canvas.addEventListener("pointerdown", onPointerDown);
@@ -311,6 +378,7 @@ export async function mountNecklace(container: HTMLElement, source: string): Pro
   resize();
 
   return {
+    show,
     dispose() {
       disposed = true;
       cancelAnimationFrame(frame);
@@ -318,11 +386,8 @@ export async function mountNecklace(container: HTMLElement, source: string): Pro
       viewWatcher.disconnect();
       document.removeEventListener("visibilitychange", wake);
       canvas.remove();
-      model.traverse((object) => {
-        if (!(object instanceof Mesh)) return;
-        object.geometry.dispose();
-        (Array.isArray(object.material) ? object.material : [object.material]).forEach((material: Material) => material.dispose());
-      });
+      /* every model that was downloaded, and any that is still on its way */
+      for (const pending of loading.values()) pending.then(({ model }) => discard(model), () => {});
       environment.dispose();
       renderer.dispose();
     },
