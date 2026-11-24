@@ -11,11 +11,15 @@ import {
   Box3,
   BoxGeometry,
   Color,
+  DataTexture,
   DirectionalLight,
   Float32BufferAttribute,
   Group,
+  LinearFilter,
   Mesh,
   MeshBasicMaterial,
+  MeshPhysicalMaterial,
+  MeshStandardMaterial,
   NeutralToneMapping,
   PerspectiveCamera,
   PMREMGenerator,
@@ -29,14 +33,51 @@ import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module.j
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 const FIELD_OF_VIEW = 26;
-const START_YAW = -0.32;
+const START_YAW = 0.35;
 const START_PITCH = 0.26;
 const PITCH_RANGE = [-0.2, 0.75] as const;
 const FRAMED_PITCH = 0.55; // the framing leaves room to tilt this far before anything gets cut off
-const AUTO_SPIN = 0.22; // radians per second
-const IDLE_BEFORE_SPIN = 2500; // ms after the last touch before it spins on its own again
+
+const HEART = "mesh1";
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
+/*
+  A thin film over the heart's metal, so it shimmers through pastels as it turns. Two things
+  make the colours show. The film gets thicker from one corner of the heart to the other,
+  which spreads them into bands; at one thickness a flat face is a single flat tint. And the
+  heart's pure white is toned down a little, because over a perfect mirror they cancel out.
+*/
+function makeIridescent(heart: Mesh) {
+  /* the model has no texture coordinates, so lay one axis diagonally across the heart */
+  const position = heart.geometry.getAttribute("position");
+  const along = Array.from({ length: position.count }, (_, i) => position.getX(i) + position.getY(i));
+  const low = Math.min(...along);
+  const span = Math.max(...along) - low || 1;
+  heart.geometry.setAttribute("uv", new Float32BufferAttribute(along.flatMap((value) => [(value - low) / span, 0.5]), 2));
+
+  /* film thickness is read from the green channel: a plain ramp from thinnest to thickest */
+  const ramp = new Uint8Array(256 * 4);
+  for (let i = 0; i < 256; i++) ramp[i * 4 + 1] = i;
+  const thickness = new DataTexture(ramp, 256, 1);
+  thickness.minFilter = thickness.magFilter = LinearFilter;
+  thickness.needsUpdate = true;
+
+  const metal = heart.material as MeshStandardMaterial;
+  const film = new MeshPhysicalMaterial({
+    color: "#e6e6e6",
+    metalness: metal.metalness,
+    roughness: metal.roughness,
+    iridescence: 1,
+    iridescenceIOR: 1.8,
+    iridescenceThicknessMap: thickness,
+    iridescenceThicknessMinimum: 250, // nm
+    iridescenceThicknessMaximum: 450,
+  });
+  film.addEventListener("dispose", () => thickness.dispose());
+  heart.material = film;
+  metal.dispose();
+}
 
 /*
   A tiny studio to reflect. It is kept close to neutral so silver reads as silver and gold as
@@ -129,7 +170,6 @@ export async function mountNecklace(container: HTMLElement, source: string): Pro
   let lastX = 0;
   let lastY = 0;
   let lastMove = 0;
-  let lastTouch = -Infinity;
   let lastFrame = performance.now();
 
   const stillness = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -158,16 +198,11 @@ export async function mountNecklace(container: HTMLElement, source: string): Pro
     const elapsed = now - lastFrame > 100 ? 16 : now - lastFrame;
     lastFrame = now;
 
+    /* it only ever turns by hand: a drag, and the little glide left over once the drag lets go */
     let moving = dragging;
     if (!dragging && Math.abs(velocity) > 0.00002) {
       yaw += velocity * elapsed;
       velocity *= Math.exp(-elapsed / 320);
-      moving = true;
-    }
-    if (!stillness.matches && !dragging) {
-      /* ease back into the idle spin a little after the visitor lets go */
-      const ease = clamp((now - lastTouch - IDLE_BEFORE_SPIN) / 1500, 0, 1);
-      yaw += AUTO_SPIN * ease * (elapsed / 1000);
       moving = true;
     }
 
@@ -189,7 +224,6 @@ export async function mountNecklace(container: HTMLElement, source: string): Pro
     lastX = event.clientX;
     lastY = event.clientY;
     lastMove = event.timeStamp;
-    lastTouch = performance.now();
     canvas.setPointerCapture(event.pointerId);
     canvas.style.cursor = "grabbing";
     wake();
@@ -206,7 +240,6 @@ export async function mountNecklace(container: HTMLElement, source: string): Pro
     lastX = event.clientX;
     lastY = event.clientY;
     lastMove = event.timeStamp;
-    lastTouch = performance.now();
     wake();
   }
 
@@ -214,7 +247,6 @@ export async function mountNecklace(container: HTMLElement, source: string): Pro
     if (!dragging) return;
     dragging = false;
     if (event.timeStamp - lastMove > 80) velocity = 0;
-    lastTouch = performance.now();
     canvas.style.cursor = "grab";
     wake();
   }
@@ -226,7 +258,6 @@ export async function mountNecklace(container: HTMLElement, source: string): Pro
     yaw += step[0];
     pitch = clamp(pitch + step[1], ...PITCH_RANGE);
     velocity = 0;
-    lastTouch = performance.now();
     wake();
   }
 
@@ -238,8 +269,11 @@ export async function mountNecklace(container: HTMLElement, source: string): Pro
     throw error;
   });
 
-  /* centre the necklace on the turntable and measure it for framing */
   const model = gltf.scene;
+  const heart = model.getObjectByName(HEART);
+  if (heart instanceof Mesh) makeIridescent(heart);
+
+  /* centre the necklace on the turntable and measure it for framing */
   model.updateMatrixWorld(true);
   const bounds = new Box3().setFromObject(model);
   const centre = bounds.getCenter(new Vector3());
@@ -264,7 +298,6 @@ export async function mountNecklace(container: HTMLElement, source: string): Pro
   canvas.addEventListener("pointercancel", onPointerEnd);
   canvas.addEventListener("keydown", onKeyDown);
   document.addEventListener("visibilitychange", wake);
-  stillness.addEventListener("change", wake);
 
   const sizeWatcher = new ResizeObserver(resize);
   sizeWatcher.observe(container);
@@ -284,7 +317,6 @@ export async function mountNecklace(container: HTMLElement, source: string): Pro
       sizeWatcher.disconnect();
       viewWatcher.disconnect();
       document.removeEventListener("visibilitychange", wake);
-      stillness.removeEventListener("change", wake);
       canvas.remove();
       model.traverse((object) => {
         if (!(object instanceof Mesh)) return;
