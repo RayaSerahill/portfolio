@@ -1,6 +1,7 @@
 /*
-  All the three.js for the header's necklace viewer. Kept free of React and loaded with a
-  dynamic import, so three.js only downloads on this page and only after the page is up.
+  All the three.js for the page's 3D viewers: the one in the header and the one on each piece
+  card. Kept free of React and loaded with a dynamic import, so three.js only downloads on
+  this page and only after the page is up.
 
   The necklaces come from scripts/pmp-to-glb.mjs, which names their nodes after the .mdl meshes.
   The collars are exported straight from Blender and keep the names their parts have there.
