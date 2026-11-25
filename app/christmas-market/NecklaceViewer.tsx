@@ -21,16 +21,14 @@ const COLLARS = [
 ] as const satisfies readonly Piece[];
 
 /*
-  The header's 3D viewer, with a button for each piece on offer: necklaces to its left and
-  collars to its right. three.js and the first model only start loading once the page is up;
-  the others wait for their button.
+  Puts a 3D viewer showing `first` into the element that gets `container`. three.js and the
+  model only start loading once the page is up, and with `whenNear` they also wait until the
+  element is about to scroll into view.
 */
-export function NecklaceViewer() {
+function useViewer(first: ModelId, whenNear = false) {
   const container = useRef<HTMLDivElement>(null);
   const viewer = useRef<Viewer | null>(null);
   const [state, setState] = useState<"loading" | "ready" | "failed">("loading");
-  const [model, setModel] = useState<ModelId>(NECKLACES[0].id);
-  const [switching, setSwitching] = useState(false);
 
   useEffect(() => {
     const element = container.current;
@@ -38,26 +36,60 @@ export function NecklaceViewer() {
 
     let cancelled = false;
 
-    import("./necklaceScene")
-      .then(({ mountNecklace }) => mountNecklace(element, NECKLACES[0].id))
-      .then((mounted) => {
-        if (cancelled) {
-          mounted.dispose();
-          return;
-        }
-        viewer.current = mounted;
-        setState("ready");
-      })
-      .catch(() => {
-        if (!cancelled) setState("failed");
-      });
+    function mount(into: HTMLElement) {
+      import("./necklaceScene")
+        .then(({ mountNecklace }) => mountNecklace(into, first))
+        .then((mounted) => {
+          if (cancelled) {
+            mounted.dispose();
+            return;
+          }
+          viewer.current = mounted;
+          setState("ready");
+        })
+        .catch(() => {
+          if (!cancelled) setState("failed");
+        });
+    }
+
+    let nearness: IntersectionObserver | undefined;
+    if (whenNear) {
+      nearness = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry.isIntersecting) return;
+          nearness?.disconnect();
+          mount(element);
+        },
+        { rootMargin: "400px 0px" },
+      );
+      nearness.observe(element);
+    } else {
+      mount(element);
+    }
 
     return () => {
       cancelled = true;
+      nearness?.disconnect();
       viewer.current?.dispose();
       viewer.current = null;
     };
-  }, []);
+  }, [first, whenNear]);
+
+  return { container, viewer, state };
+}
+
+const note = (state: "loading" | "failed", name: string) =>
+  state === "loading" ? `Polishing the ${name}…` : "The 3D preview could not load on this device.";
+
+/*
+  The header's 3D viewer, with a button for each piece on offer: necklaces to its left and
+  collars to its right. Only the first model loads with the viewer; the others wait for
+  their button.
+*/
+export function NecklaceViewer() {
+  const { container, viewer, state } = useViewer(NECKLACES[0].id);
+  const [model, setModel] = useState<ModelId>(NECKLACES[0].id);
+  const [switching, setSwitching] = useState(false);
 
   /* one swap at a time: nothing changes again until the piece asked for is on screen */
   function pick(id: ModelId) {
@@ -101,10 +133,29 @@ export function NecklaceViewer() {
       <div className={styles.viewer} data-state={state} ref={container}>
         {state !== "ready" && (
           <p className={styles.viewerNote} role="status">
-            {state === "loading" ? "Polishing the necklace…" : "The 3D preview could not load on this device."}
+            {note(state, "necklace")}
           </p>
         )}
       </div>
     </>
+  );
+}
+
+/*
+  One piece on its own, for the cards further down the page: the same viewer without the
+  buttons. `name` is what the card calls the piece. Nothing loads before the card is close
+  to being on screen.
+*/
+export function PieceViewer({ model, name }: { model: ModelId; name: string }) {
+  const { container, state } = useViewer(model, true);
+
+  return (
+    <div className={styles.pieceViewer} data-state={state} ref={container}>
+      {state !== "ready" && (
+        <p className={styles.viewerNote} role="status">
+          {note(state, name)}
+        </p>
+      )}
+    </div>
   );
 }
