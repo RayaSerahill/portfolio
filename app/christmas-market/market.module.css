@@ -212,6 +212,12 @@
   transform: translateY(-50%);
 }
 
+/* the collars get a picker of their own, over the right edge */
+.collarPicker {
+  right: 0;
+  left: auto;
+}
+
 .modelButton {
   display: inline-flex;
   min-height: 48px;
@@ -230,10 +236,11 @@
   animation: viewerIn 700ms ease both;
 }
 
-/* switched on, it stays pushed in and turns pale */
+/* the piece on show: its button stays pushed in and turns pale */
 .modelButton[aria-pressed="true"] {
   background: var(--snow);
   box-shadow: 1px 1px 0 var(--pink);
+  cursor: default;
   transform: translate(3px, 3px);
 }
 
@@ -1107,10 +1114,11 @@
     display: none;
   }
 
-  /* no room beside the moon here, so the picker drops to the corner under it */
+  /* no room beside the moon here, so each picker drops to the corner under it, side by side */
   .modelPicker {
     top: auto;
-    bottom: -52px;
+    bottom: -62px;
+    flex-direction: row;
     transform: none;
   }
 
@@ -1130,7 +1138,28 @@
   }
 }
 
+@media (max-width: 640px) {
+  /* all five buttons no longer fit in one row, so the collars take a second row under it */
+  .stage {
+    padding-bottom: calc(var(--hills) * 0.75 + 72px);
+  }
+
+  .collarPicker {
+    bottom: -120px;
+  }
+}
+
 @media (max-width: 480px) {
+  /* three buttons in a row is a squeeze on a phone, so they slim down */
+  .modelPicker {
+    gap: 0.5rem;
+  }
+
+  .modelButton {
+    gap: 0.4rem;
+    padding: 0.55rem 0.95rem 0.55rem 0.8rem;
+  }
+
   .eventLabel {
     letter-spacing: 0.14em;
   }
