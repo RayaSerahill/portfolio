@@ -2,8 +2,9 @@
   All the three.js for the header's necklace viewer. Kept free of React and loaded with a
   dynamic import, so three.js only downloads on this page and only after the page is up.
 
-  The models come from scripts/pmp-to-glb.mjs, which names their nodes after the .mdl meshes.
-  Each one is only downloaded when it is first shown.
+  The necklaces come from scripts/pmp-to-glb.mjs, which names their nodes after the .mdl meshes.
+  The collars are exported straight from Blender and keep the names their parts have there.
+  Each model is only downloaded when it is first shown.
 */
 
 import {
@@ -11,11 +12,9 @@ import {
   Box3,
   BoxGeometry,
   Color,
-  DataTexture,
   DirectionalLight,
   Float32BufferAttribute,
   Group,
-  LinearFilter,
   Mesh,
   MeshBasicMaterial,
   MeshPhysicalMaterial,
@@ -41,69 +40,123 @@ const FRAMED_PITCH = 0.55; // the framing leaves room to tilt this far before an
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
 /*
-  A thin film over a charm's metal, so it shimmers through pastels as it turns. Two things
-  make the colours show. The film gets thicker from one corner of the charm to the other,
-  which spreads them into bands; at one thickness a flat face is a single flat tint. And the
-  metal's pure white is toned down a little, because over a perfect mirror they cancel out.
+  A thin film over polished metal, the kind that makes soap bubbles and oil slicks shimmer.
+  Its colour depends on the angle it is seen from, so every facet shows its own colour and
+  they all shift as the necklace turns. Two things make that easy to see. A real film only
+  shifts a little with the angle, so here its thickness follows the angle as well, which
+  runs each facet through a few rounds of colours on its way from face on to edge on. And
+  the metal's pure white is toned down, because over a perfect mirror the colours cancel out.
+
+  `sweep` is for chains. A round link faces every way at once, so all its colours blur into
+  grey at this size. A chain's film therefore barely follows the facing, and follows the
+  direction the camera sees each spot from instead: that lays the colours along the chain
+  and makes the links run through them as it turns.
 */
-function makeIridescent(charm: Mesh) {
-  /* the models have no texture coordinates, so lay one axis diagonally across the charm */
-  const position = charm.geometry.getAttribute("position");
-  const along = Array.from({ length: position.count }, (_, i) => position.getX(i) + position.getY(i));
-  const low = Math.min(...along);
-  const span = Math.max(...along) - low || 1;
-  charm.geometry.setAttribute("uv", new Float32BufferAttribute(along.flatMap((value) => [(value - low) / span, 0.5]), 2));
+type Film = { faceOn: number; edgeOn: number; sweep: number }; // nm, nm, and nm per unit of view direction
 
-  /* film thickness is read from the green channel: a plain ramp from thinnest to thickest */
-  const ramp = new Uint8Array(256 * 4);
-  for (let i = 0; i < 256; i++) ramp[i * 4 + 1] = i;
-  const thickness = new DataTexture(ramp, 256, 1);
-  thickness.minFilter = thickness.magFilter = LinearFilter;
-  thickness.needsUpdate = true;
+const CHARM_FILM: Film = { faceOn: 600, edgeOn: 200, sweep: 0 };
+const CHAIN_FILM: Film = { faceOn: 430, edgeOn: 410, sweep: 650 };
 
-  const metal = charm.material as MeshStandardMaterial;
+function makeIridescent(part: Mesh, { faceOn, edgeOn, sweep }: Film) {
   const film = new MeshPhysicalMaterial({
-    color: "#e6e6e6",
-    metalness: metal.metalness,
-    roughness: metal.roughness,
+    color: "#d9d9d9",
+    metalness: 1,
+    roughness: 0.2,
     iridescence: 1,
     iridescenceIOR: 1.8,
-    iridescenceThicknessMap: thickness,
-    iridescenceThicknessMinimum: 250, // nm
-    iridescenceThicknessMaximum: 450,
+    iridescenceThicknessMinimum: edgeOn,
+    iridescenceThicknessMaximum: faceOn,
   });
-  film.addEventListener("dispose", () => thickness.dispose());
-  charm.material = film;
-  metal.dispose();
+  /*
+    three.js takes the thickness from a number or a texture, so the angles are added to its
+    shader by hand. This leans on names inside three's physical shader (as of r187).
+  */
+  film.onBeforeCompile = (shader) => {
+    shader.uniforms.filmSweep = { value: sweep };
+    shader.fragmentShader = `uniform float filmSweep;\n${shader.fragmentShader}`.replace(
+      "#include <lights_physical_fragment>",
+      `#include <lights_physical_fragment>
+      vec3 filmView = normalize( vViewPosition );
+      material.iridescenceThickness = mix( iridescenceThicknessMinimum, iridescenceThicknessMaximum, saturate( dot( normal, filmView ) ) ) + filmSweep * ( filmView.x + filmView.y );`,
+    );
+  };
+  refinish(part, film);
 }
 
 /*
-  Black metal: dark, but still bright enough in the reflections to read as metal. The puppy's
-  chain and text share one material in the model, so both calls land on the same one.
+  Puts a finish made here in place of whatever the model gave this part, baked textures
+  included. Every part gets a material of its own, because parts in a model often share one
+  (anything Blender exported without a material does) and may be finished differently here.
 */
+function refinish(part: Mesh, finish: MeshStandardMaterial) {
+  const replaced = part.material as MeshStandardMaterial;
+  finish.side = replaced.side; // a thin shell, like a collar's band, shows both of its sides
+  part.material = finish;
+  replaced.map?.dispose();
+  replaced.roughnessMap?.dispose();
+  replaced.dispose();
+}
+
+const makeIridescentCharm = (charm: Mesh) => makeIridescent(charm, CHARM_FILM);
+const makeIridescentChain = (chain: Mesh) => makeIridescent(chain, CHAIN_FILM);
+
+/* black metal: dark, but still bright enough in the reflections to read as metal */
 function makeBlackMetal(part: Mesh) {
-  const metal = part.material as MeshStandardMaterial;
-  metal.color.set("#4a4450");
-  metal.metalness = 1;
-  metal.roughness = 0.24;
+  refinish(part, new MeshStandardMaterial({ color: "#4a4450", metalness: 1, roughness: 0.24 }));
+}
+
+/* polished silver, the same as the mod gives the star */
+function makeSilver(part: Mesh) {
+  refinish(part, new MeshStandardMaterial({ color: "#ffffff", metalness: 1, roughness: 0.2 }));
 }
 
 /*
-  The models the viewer can show. `finishes` are the looks set here instead of by the mod:
-  its materials cannot describe a thin film, and the puppy's chain and text material is
-  still an untouched default.
+  The models the viewer can show. `finishes` are the looks set here instead of by the model,
+  keyed by the name of the part they go on: the materials in the files cannot describe a thin
+  film, and some are still untouched defaults.
 */
-export type ModelId = "necklace" | "puppy";
+export type ModelId = "necklace" | "puppy" | "star" | "dom" | "shie";
 
-const MODELS: Record<ModelId, { source: string; finishes: Record<string, (mesh: Mesh) => void> }> = {
+type Model = { piece: "necklace" | "collar"; source: string; finishes: Record<string, (part: Mesh) => void> };
+
+const MODELS: Record<ModelId, Model> = {
   /* mesh0 is the text, mesh1 the heart, mesh2 and mesh3 the chain */
-  necklace: { source: "/christmas-market/necklace.glb", finishes: { mesh1: makeIridescent } },
+  necklace: { piece: "necklace", source: "/christmas-market/necklace.glb", finishes: { mesh1: makeIridescentCharm } },
   /* mesh0 is the text, mesh1 the bone, mesh2 the chain */
   puppy: {
+    piece: "necklace",
     source: "/christmas-market/puppy.glb",
-    finishes: { mesh0: makeBlackMetal, mesh1: makeIridescent, mesh2: makeBlackMetal },
+    finishes: { mesh0: makeBlackMetal, mesh1: makeIridescentCharm, mesh2: makeBlackMetal },
+  },
+  /* mesh0 is the star, which keeps the polished silver the mod gives it; mesh1 is the chain */
+  star: { piece: "necklace", source: "/christmas-market/star.glb", finishes: { mesh1: makeIridescentChain } },
+  /* Cylinder057 is the band and the strap end over its back, as a group of two meshes */
+  dom: {
+    piece: "collar",
+    source: "/christmas-market/collar-dom.glb",
+    finishes: { Cylinder057: makeBlackMetal, Spikes: makeIridescentCharm, Text: makeIridescentCharm },
+  },
+  /* the same band; here Text is the text and the hearts beside it, as one mesh */
+  shie: {
+    piece: "collar",
+    source: "/christmas-market/collar-shie.glb",
+    finishes: { Cylinder057: makeBlackMetal, Text: makeSilver },
   },
 };
+
+/*
+  The collars come out of Blender the way they sit on a neck, leaning forward with the front
+  edge down. Turned around like that they end up edge on to the camera, so the viewer stands
+  them level.
+*/
+const COLLAR_LEAN = 0.276; // radians
+
+/*
+  A level collar's faces are upright, and seen from above an upright mirror reflects the
+  floor, which is dark in this studio: silver text came out black. So while a collar is on
+  show the studio is tipped until its bright sky is what those faces reflect.
+*/
+const COLLAR_STUDIO_TILT = 0.7; // radians
 
 /* a model that is ready to show: centred on the turntable and measured for framing */
 type Loaded = { model: Group; reach: number; rise: number };
@@ -177,8 +230,7 @@ export async function mountNecklace(container: HTMLElement, first: ModelId): Pro
 
   const canvas = renderer.domElement;
   canvas.tabIndex = 0;
-  canvas.setAttribute("role", "img");
-  canvas.setAttribute("aria-label", "3D preview of a custom necklace. Drag it, or use the arrow keys, to turn it around.");
+  canvas.setAttribute("role", "img"); // show() gives it a label that names the piece on screen
   /* vertical swipes keep scrolling the page; sideways drags turn the necklace */
   canvas.style.touchAction = "pan-y";
 
@@ -315,10 +367,13 @@ export async function mountNecklace(container: HTMLElement, first: ModelId): Pro
     pending = loader.loadAsync(MODELS[id].source).then((gltf) => {
       const model = gltf.scene;
       for (const [name, finish] of Object.entries(MODELS[id].finishes)) {
-        const mesh = model.getObjectByName(name);
-        if (mesh instanceof Mesh) finish(mesh);
+        /* a name is one mesh, or a group of them where the model split a part in two */
+        model.getObjectByName(name)?.traverse((part) => {
+          if (part instanceof Mesh) finish(part);
+        });
       }
 
+      if (MODELS[id].piece === "collar") model.rotation.x = -COLLAR_LEAN;
       model.updateMatrixWorld(true);
       const bounds = new Box3().setFromObject(model);
       const centre = bounds.getCenter(new Vector3());
@@ -349,6 +404,8 @@ export async function mountNecklace(container: HTMLElement, first: ModelId): Pro
     spin.add(next.model);
     shown = next;
     ({ reach, rise } = next);
+    scene.environmentRotation.x = MODELS[id].piece === "collar" ? COLLAR_STUDIO_TILT : 0;
+    canvas.setAttribute("aria-label", `3D preview of a custom ${MODELS[id].piece}. Drag it, or use the arrow keys, to turn it around.`);
     resize();
   }
 
