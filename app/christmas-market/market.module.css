@@ -1,0 +1,1070 @@
+/* ------------------------------------------------------------------ */
+/*  Christmas Market: pink winter                                      */
+/*  snow: #fffafb #fdeef3  ·  pinks: #f9d3df #f2adc5 #ec7fa6 #c33f72   */
+/*  plums: #3a1632 #2c0f28  ·  light bulbs: #f5d27f                    */
+/* ------------------------------------------------------------------ */
+
+.page {
+  --snow: #fffafb;
+  --frost: #fdeef3;
+  --blush: #f9d3df;
+  --petal: #f2adc5;
+  --pink: #ec7fa6;
+  --raspberry: #c33f72;
+  --ink: #3a1632;
+  --ink-soft: #6d4963;
+  --night: #2c0f28;
+  --display: var(--font-market-display), "Cormorant Garamond", Georgia, serif;
+  --body: var(--font-market-body), "Quicksand", var(--font-geist-sans), system-ui, sans-serif;
+  --wrap: min(1120px, calc(100% - 40px));
+
+  position: relative;
+  min-height: 100svh;
+  overflow-x: clip;
+  background: var(--snow);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+:global(html):has(.page),
+:global(body):has(.page) {
+  background: #2c0f28;
+}
+
+.page * {
+  box-sizing: border-box;
+}
+
+.page a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page a:focus-visible {
+  outline: 2px solid var(--raspberry);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.page ::selection {
+  background: var(--blush);
+  color: var(--ink);
+}
+
+/* ---------- top bar ---------- */
+
+.topbar {
+  position: absolute;
+  z-index: 20;
+  top: 0;
+  left: 50%;
+  display: flex;
+  width: var(--wrap);
+  min-height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px dashed rgba(255, 214, 226, 0.42);
+  color: #ffe9f0;
+  transform: translateX(-50%);
+}
+
+.page .topbar a:focus-visible {
+  outline-color: #ffd6e2;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--display);
+  font-size: 1.3rem;
+  font-style: italic;
+  line-height: 1.1;
+}
+
+.brand svg {
+  flex: none;
+  color: #ffb9d0;
+}
+
+.nav {
+  display: flex;
+  gap: 1.75rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.nav a {
+  transition: color 160ms ease;
+}
+
+.nav a:hover {
+  color: #fff;
+  text-decoration: underline dotted #ffb9d0;
+  text-underline-offset: 6px;
+}
+
+/* ---------- header stage (empty until the model viewer lands) ---------- */
+
+.hero {
+  --hills: clamp(110px, 17vw, 220px);
+
+  position: relative;
+  display: grid;
+  min-height: clamp(440px, 72svh, 760px);
+  overflow: hidden;
+  background: linear-gradient(180deg, #3a1433 0%, #6e2957 30%, #b9527f 58%, #ee9bb8 82%, #ffd0de 100%);
+  isolation: isolate;
+}
+
+.stage {
+  position: relative;
+  z-index: 5;
+  display: grid;
+  width: var(--wrap);
+  grid-template-columns: minmax(0, 1fr) minmax(200px, 280px);
+  gap: clamp(1rem, 3vw, 2.5rem);
+  align-items: center;
+  margin: 0 auto;
+  padding: 136px 0 calc(var(--hills) * 0.75);
+}
+
+/* the buttons column only takes up room once it has something in it */
+.stage:has(.controlsSlot:empty) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.controlsSlot:empty {
+  display: none;
+}
+
+.viewerSlot {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  min-height: min(38svh, 58vw, 360px);
+  place-items: center;
+}
+
+/* winter moon: a thin ring that stays centred behind whatever the viewer shows */
+.viewerSlot::before {
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: 50%;
+  height: 100%;
+  aspect-ratio: 1;
+  border: 1.5px solid rgba(255, 228, 237, 0.62);
+  border-radius: 50%;
+  background: rgba(255, 236, 242, 0.1);
+  content: "";
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+/* the canvas reaches past the moon ring, so the necklace can be bigger than the ring itself */
+.viewer {
+  position: absolute;
+  inset: -64px 0;
+}
+
+.viewer canvas,
+.pieceViewer canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  outline: none;
+  animation: viewerIn 700ms ease both;
+}
+
+.viewer canvas:focus-visible {
+  border-radius: 14px;
+  outline: 2px solid #ffd6e2;
+  outline-offset: 2px;
+}
+
+.viewerNote {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  margin: 0;
+  padding: 0 1rem;
+  place-items: center;
+  color: #ffe9f0;
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* model picker: over the left edge of the viewer, level with the middle of the moon */
+.modelPicker {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transform: translateY(-50%);
+}
+
+/* the collars get a picker of their own, over the right edge */
+.collarPicker {
+  right: 0;
+  left: auto;
+}
+
+.modelButton {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.55rem 1.35rem 0.55rem 1.1rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--pink);
+  box-shadow: 4px 4px 0 #ffd6e2;
+  color: var(--night);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  animation: viewerIn 700ms ease both;
+}
+
+/* the piece on show: its button stays pushed in and turns pale */
+.modelButton[aria-pressed="true"] {
+  background: var(--snow);
+  box-shadow: 1px 1px 0 var(--pink);
+  cursor: default;
+  transform: translate(3px, 3px);
+}
+
+.modelButton[aria-busy="true"] {
+  cursor: progress;
+}
+
+.modelButton:focus-visible {
+  outline: 2px solid #ffd6e2;
+  outline-offset: 4px;
+}
+
+/* only where a pointer can really hover, so the look does not stick after a tap */
+@media (hover: hover) {
+  .modelButton:hover {
+    box-shadow: 1px 1px 0 #ffd6e2;
+    transform: translate(3px, 3px);
+  }
+
+  .modelButton[aria-pressed="true"]:hover {
+    box-shadow: 1px 1px 0 var(--pink);
+  }
+}
+
+.controlsSlot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.garland {
+  position: absolute;
+  z-index: 6;
+  top: 64px;
+  right: 0;
+  left: 0;
+  height: 56px;
+  background: url("/christmas-market/lights.svg") center top / 240px 56px repeat-x;
+  pointer-events: none;
+}
+
+.garland::before,
+.garland::after {
+  position: absolute;
+  inset: 0;
+  background: url("/christmas-market/lights-a.svg") center top / 240px 56px repeat-x;
+  content: "";
+  animation: twinkle 5s ease-in-out infinite;
+}
+
+.garland::after {
+  background-image: url("/christmas-market/lights-b.svg");
+  animation-delay: -2.5s;
+}
+
+.scene {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+}
+
+.star {
+  position: absolute;
+  color: #ffe1ea;
+  fill: currentColor;
+}
+
+.starOne {
+  top: 27%;
+  left: 13%;
+  width: 20px;
+  height: 20px;
+  opacity: 0.9;
+}
+
+.starTwo {
+  top: 43%;
+  left: 24%;
+  width: 11px;
+  height: 11px;
+  opacity: 0.7;
+}
+
+.starThree {
+  top: 30%;
+  right: 16%;
+  width: 14px;
+  height: 14px;
+  opacity: 0.8;
+}
+
+.starFour {
+  top: 47%;
+  right: 8%;
+  width: 22px;
+  height: 22px;
+  opacity: 0.75;
+}
+
+.hill {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: var(--hills);
+}
+
+.hillBack {
+  z-index: 1;
+  fill: #f3b4ca;
+}
+
+.hillFront {
+  z-index: 3;
+  fill: var(--snow);
+}
+
+.grove {
+  position: absolute;
+  z-index: 2;
+  bottom: calc(var(--hills) * 0.08);
+  width: auto;
+  height: calc(var(--hills) * 1.25);
+  aspect-ratio: 3 / 2;
+}
+
+.groveLeft {
+  left: calc(5vw - 56px);
+}
+
+.groveRight {
+  right: calc(5vw - 56px);
+}
+
+/* ---------- snow ---------- */
+
+.snow {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  container-type: size;
+}
+
+.flake {
+  position: absolute;
+  top: -12px;
+  left: var(--x);
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  background: #fff;
+  opacity: var(--alpha);
+  animation: snowfall var(--time) linear var(--delay) infinite;
+}
+
+/* ---------- intro ---------- */
+
+.intro {
+  padding: clamp(2.5rem, 6vw, 4.25rem) 0 clamp(0.5rem, 2vw, 1.5rem);
+  text-align: center;
+}
+
+.introInner {
+  width: min(780px, calc(100% - 40px));
+  margin: 0 auto;
+}
+
+.eventLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0 0 1.1rem;
+  color: var(--raspberry);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.eventLabel svg {
+  flex: none;
+  color: var(--pink);
+}
+
+.intro h1 {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: clamp(2.7rem, 7vw, 4.9rem);
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.intro h1 em {
+  color: var(--raspberry);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.lede {
+  max-width: 34rem;
+  margin: 1.4rem auto 0;
+  color: var(--ink-soft);
+  font-size: 1.12rem;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  margin-top: 2.2rem;
+  color: var(--pink);
+}
+
+.divider::before,
+.divider::after {
+  width: min(120px, 22vw);
+  border-top: 1.5px dashed var(--petal);
+  content: "";
+}
+
+/* ---------- sections ---------- */
+
+.section {
+  padding: clamp(3.25rem, 8vw, 5.75rem) 0;
+  scroll-margin-top: 1rem;
+}
+
+.tinted {
+  border-block: 1.5px dashed var(--petal);
+  background: var(--frost);
+}
+
+.inner {
+  width: var(--wrap);
+  margin: 0 auto;
+}
+
+.sectionHead {
+  max-width: 640px;
+  margin-bottom: clamp(1.9rem, 4vw, 2.75rem);
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  margin: 0 0 0.7rem;
+  color: var(--raspberry);
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.step span {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 0.75rem;
+  font-family: var(--display);
+  font-size: 1.75rem;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.step span::after {
+  width: 30px;
+  margin-left: 0.75rem;
+  border-top: 1.5px solid var(--petal);
+  content: "";
+}
+
+.sectionHead h2,
+.closing h2 {
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(2.1rem, 4.6vw, 3.1rem);
+  font-weight: 600;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+
+.sectionHead > p:last-child {
+  margin: 0.85rem 0 0;
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+}
+
+/* ---------- 01: the piece ---------- */
+
+.pieceGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1.25rem, 3vw, 2rem);
+}
+
+.pieceCard {
+  position: relative;
+  overflow: hidden;
+  border: 1.5px solid var(--petal);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 7px 7px 0 var(--blush);
+}
+
+.pieceCard::before {
+  display: block;
+  height: 7px;
+  background: repeating-linear-gradient(135deg, var(--pink) 0 8px, #fff 8px 16px);
+  content: "";
+}
+
+/* the same dusk as the header's sky, so the metal has something dark to shine against */
+.pieceArt {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-block: 1.5px dashed var(--petal);
+  background: linear-gradient(180deg, #5a2049 0%, #9a4070 55%, #dd88ab 100%) padding-box;
+}
+
+/* each card shows its piece in a 3D viewer of its own, which fills the art */
+.pieceViewer {
+  position: absolute;
+  inset: 0;
+}
+
+/* the card clips whatever sticks out of it, so the focus ring is drawn inside the art */
+.pieceViewer canvas:focus-visible {
+  outline: 2px solid #ffd6e2;
+  outline-offset: -6px;
+}
+
+.pieceBody {
+  padding: 1.5rem 1.6rem 1.75rem;
+}
+
+.pieceBody h3 {
+  margin: 0 0 0.35rem;
+  font-family: var(--display);
+  font-size: 2.1rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.pieceBody > p {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.pieceBody > .chooseLabel {
+  margin: 1.25rem 0 0.6rem;
+  color: var(--raspberry);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.chooseList {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chooseList li {
+  display: grid;
+  grid-template-columns: 15px minmax(0, 1fr);
+  gap: 0.65rem;
+  align-items: center;
+  font-weight: 600;
+}
+
+.chooseList svg {
+  color: var(--pink);
+}
+
+.chipList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chipList li {
+  padding: 0.2rem 0.7rem;
+  border: 1.5px dashed var(--petal);
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+/* ---------- 02: text & logo, as gift tags ---------- */
+
+.tagGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 2.5vw, 1.75rem);
+  padding-top: 20px;
+}
+
+.tag {
+  position: relative;
+  padding: 2.9rem 1.5rem 1.7rem;
+  border: 1.5px solid var(--petal);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 6px 6px 0 var(--blush);
+  text-align: center;
+}
+
+/* punched hole */
+.tag::before {
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  border: 1.5px solid var(--petal);
+  border-radius: 50%;
+  background: var(--frost);
+  content: "";
+}
+
+/* loop of string through the hole */
+.tag::after {
+  position: absolute;
+  top: -19px;
+  left: 50%;
+  width: 20px;
+  height: 42px;
+  margin-left: -10px;
+  border: 1.5px solid var(--raspberry);
+  border-radius: 50%;
+  content: "";
+  transform: rotate(7deg);
+  transform-origin: 50% 100%;
+}
+
+.tag:nth-child(2)::after {
+  transform: rotate(-9deg);
+}
+
+.tag:nth-child(3)::after {
+  transform: rotate(13deg);
+}
+
+.tagArt {
+  display: grid;
+  place-items: center;
+  margin-bottom: 0.9rem;
+}
+
+.tagArt svg {
+  width: min(200px, 100%);
+  height: auto;
+}
+
+.tag h3 {
+  margin: 0 0 0.3rem;
+  font-family: var(--display);
+  font-size: 1.7rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.tag p {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+/* ---------- 03: metals, as baubles ---------- */
+
+.rail {
+  height: 8px;
+  border: 1.5px solid var(--petal);
+  border-radius: 999px;
+  background: repeating-linear-gradient(135deg, var(--pink) 0 8px, #fff 8px 16px);
+}
+
+.baubles {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0 clamp(0rem, 2vw, 1.5rem);
+  list-style: none;
+}
+
+.baubleItem {
+  --drop: 26px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.baubleItem:nth-child(2) {
+  --drop: 58px;
+}
+
+.baubleItem:nth-child(3) {
+  --drop: 34px;
+}
+
+.baubleItem:nth-child(4) {
+  --drop: 66px;
+}
+
+.baubleItem:nth-child(5) {
+  --drop: 42px;
+}
+
+.hang {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: 50% 0;
+}
+
+.hang::before {
+  width: 1.5px;
+  height: var(--drop);
+  background: var(--petal);
+  content: "";
+}
+
+.hang svg {
+  width: clamp(54px, 10vw, 104px);
+  height: auto;
+  margin-top: -2px;
+}
+
+.baubleItem:hover .hang {
+  animation: swing 1.4s ease-in-out;
+}
+
+.baubleName {
+  margin-top: 0.8rem;
+  font-size: clamp(0.8rem, 1.6vw, 1rem);
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+}
+
+/* ---------- closing ---------- */
+
+.closing {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(5rem, 11vw, 8rem) 0 clamp(4rem, 9vw, 6rem);
+  background: linear-gradient(180deg, #4a1b40 0%, #2c0f28 100%);
+  color: #ffe9f0;
+  text-align: center;
+  isolation: isolate;
+}
+
+.closing .snow {
+  z-index: 0;
+}
+
+.drift {
+  position: absolute;
+  z-index: 1;
+  top: -1px;
+  left: 0;
+  width: 100%;
+  height: clamp(26px, 4vw, 52px);
+  fill: var(--snow);
+}
+
+.closingInner {
+  position: relative;
+  z-index: 2;
+  width: min(680px, calc(100% - 40px));
+  margin: 0 auto;
+}
+
+.closingLabel {
+  margin: 0 0 0.8rem;
+  color: #ffb9d0;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.closing h2 {
+  color: #fff;
+}
+
+.closingInner > p:not(.closingLabel) {
+  margin: 1.1rem 0 0;
+  color: rgba(255, 233, 240, 0.86);
+  font-size: 1.05rem;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+  margin-top: 2rem;
+}
+
+.discord {
+  margin: 0;
+  color: rgba(255, 233, 240, 0.86);
+  font-size: 0.95rem;
+}
+
+.discord strong {
+  color: #ffb9d0;
+  font-weight: 600;
+}
+
+.button {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 1.4rem;
+  border-radius: 999px;
+  background: var(--pink);
+  font-weight: 600;
+  box-shadow: 4px 4px 0 #ffd6e2;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.page .button {
+  color: var(--night);
+}
+
+.button:hover {
+  box-shadow: 1px 1px 0 #ffd6e2;
+  transform: translate(3px, 3px);
+}
+
+.page .closing a:focus-visible {
+  outline-color: #ffd6e2;
+}
+
+/* ---------- footer ---------- */
+
+.footer {
+  display: flex;
+  min-height: 72px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem max(20px, calc((100% - 1120px) / 2));
+  border-top: 1px dashed rgba(255, 214, 226, 0.25);
+  background: var(--night);
+  color: rgba(255, 233, 240, 0.75);
+  font-size: 0.8rem;
+}
+
+.footer p {
+  margin: 0;
+}
+
+.page .footer a {
+  color: #ffb9d0;
+  font-weight: 600;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* ---------- motion ---------- */
+
+@keyframes snowfall {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(var(--drift), 50cqh, 0);
+  }
+
+  100% {
+    transform: translate3d(calc(var(--drift) * -0.35), calc(100cqh + 24px), 0);
+  }
+}
+
+@keyframes viewerIn {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.15;
+  }
+}
+
+@keyframes swing {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(5deg);
+  }
+
+  60% {
+    transform: rotate(-3.5deg);
+  }
+
+  85% {
+    transform: rotate(1.5deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* snow stops falling and rests scattered across the scene instead */
+  .flake {
+    top: var(--y);
+    animation: none;
+  }
+
+  .garland::before,
+  .garland::after,
+  .viewer canvas,
+  .pieceViewer canvas,
+  .baubleItem:hover .hang {
+    animation: none;
+  }
+
+  .button,
+  .modelButton {
+    transition: none;
+  }
+
+  .modelButton {
+    animation: none;
+  }
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 860px) {
+  .stage {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .nav {
+    display: none;
+  }
+
+  /* no room beside the moon here, so each picker drops to the corner under it, side by side */
+  .modelPicker {
+    top: auto;
+    bottom: -62px;
+    flex-direction: row;
+    transform: none;
+  }
+
+  .pieceGrid,
+  .tagGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .tagGrid {
+    gap: 2.4rem;
+  }
+
+  .footer {
+    align-items: flex-start;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 640px) {
+  /* all five buttons no longer fit in one row, so the collars take a second row under it */
+  .stage {
+    padding-bottom: calc(var(--hills) * 0.75 + 72px);
+  }
+
+  .collarPicker {
+    bottom: -120px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* three buttons in a row is a squeeze on a phone, so they slim down */
+  .modelPicker {
+    gap: 0.5rem;
+  }
+
+  .modelButton {
+    gap: 0.4rem;
+    padding: 0.55rem 0.95rem 0.55rem 0.8rem;
+  }
+
+  .eventLabel {
+    letter-spacing: 0.14em;
+  }
+
+  .baubles {
+    gap: 0.25rem;
+  }
+}
