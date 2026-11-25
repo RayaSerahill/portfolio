@@ -1,17 +1,8 @@
 import { Cormorant_Garamond, Quicksand } from "next/font/google";
 import Link from "next/link";
 import { Mail, Snowflake } from "lucide-react";
-import {
-  Bauble,
-  ChokerSketch,
-  MetalDefs,
-  MixSketch,
-  NecklaceSketch,
-  TagSketch,
-  metals,
-  type MetalId,
-} from "./Illustrations";
-import { NecklaceViewer } from "./NecklaceViewer";
+import { Bauble, MetalDefs, TagSketch, metals } from "./Illustrations";
+import { NecklaceViewer, PieceViewer } from "./NecklaceViewer";
 import { Snowfall, WinterScene } from "./WinterScene";
 import styles from "./market.module.css";
 
@@ -29,11 +20,12 @@ const bodyFont = Quicksand({
 /* Add chain type names here and they are listed on the necklace card. */
 const chainTypes: string[] = [];
 
+/* `model` is the piece from the header's viewer that the card shows turning in 3D */
 const pieces = [
   {
     id: "necklace",
     name: "Necklace",
-    Sketch: NecklaceSketch,
+    model: "necklace",
     description:
       "Hangs on a chain, and comes with the most to play with: pick the chain type, then a metal for every part.",
     choices: [
@@ -47,9 +39,9 @@ const pieces = [
   {
     id: "choker",
     name: "Choker",
-    Sketch: ChokerSketch,
+    model: "shie",
     description: "Sits close around the neck and carries your text, your logo, or both.",
-    choices: ["Text, logo, or both", "Metal finish"],
+    choices: ["Text, logo, or both", "Decorations", "Metal finish"],
   },
 ] as const;
 
@@ -70,14 +62,6 @@ const personalisations = [
     description: "Both of them together on the same piece.",
   },
 ] as const;
-
-const exampleMix: { part: string; metal: MetalId }[] = [
-  { part: "Chain", metal: "silver" },
-  { part: "Text", metal: "rose" },
-  { part: "Symbol", metal: "holo" },
-];
-
-const metalName = (id: MetalId) => metals.find((metal) => metal.id === id)?.name ?? id;
 
 export default function ChristmasMarketPage() {
   return (
@@ -145,10 +129,10 @@ export default function ChristmasMarketPage() {
           </div>
 
           <div className={styles.pieceGrid}>
-            {pieces.map(({ id, name, Sketch, description, choices }) => (
+            {pieces.map(({ id, name, model, description, choices }) => (
               <article className={styles.pieceCard} key={id}>
                 <div className={styles.pieceArt}>
-                  <Sketch />
+                  <PieceViewer model={model} name={name.toLowerCase()} />
                 </div>
                 <div className={styles.pieceBody}>
                   <h3>{name}</h3>
@@ -224,42 +208,6 @@ export default function ChristmasMarketPage() {
               </li>
             ))}
           </ul>
-
-          <article className={styles.mix}>
-            <div className={styles.mixArt}>
-              <span className={styles.mixNote}>Example mix</span>
-              <MixSketch background="#fdeef3" />
-            </div>
-            <div className={styles.mixCopy}>
-              <h3>On a necklace, you choose three times</h3>
-              <p>
-                The chain, the text and the symbol each get their own metal. Match all three, or
-                mix them like this one.
-              </p>
-              <ol className={styles.legend}>
-                {exampleMix.map((row, index) => (
-                  <li key={row.part}>
-                    <span className={styles.legendNumber} aria-hidden="true">
-                      {index + 1}
-                    </span>
-                    {row.part}
-                    <span className={styles.legendMetal}>
-                      <svg viewBox="0 0 20 20" aria-hidden="true">
-                        <circle
-                          cx="10"
-                          cy="10"
-                          r="8.5"
-                          fill={`url(#cm-${row.metal})`}
-                          stroke="rgba(58, 22, 50, 0.34)"
-                        />
-                      </svg>
-                      {metalName(row.metal)}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          </article>
         </div>
       </section>
 
@@ -276,7 +224,7 @@ export default function ChristmasMarketPage() {
             metals.
           </p>
           <div className={styles.actions}>
-            <a className={styles.button} href="mailto:rayaserahill@gmail.com">
+            <a className={styles.button} href="mailto:contact@serahill.net">
               <Mail aria-hidden="true" size={18} />
               Email me
             </a>
