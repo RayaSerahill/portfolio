@@ -98,9 +98,10 @@ export default function ChristmasMarketPage() {
 
       {/*
         Header stage. The necklace viewer sits in viewerSlot with the moon ring behind it, and
-        brings its own model picker (the Puppy button) pinned to the slot's left edge.
-        controlsSlot is still empty: once it has children (the combination buttons) it becomes
-        a column beside the viewer on desktop and stacks underneath on small screens.
+        brings its own model pickers: a button per necklace pinned to the slot's left edge, and
+        a button per collar pinned to its right edge. controlsSlot is still empty: once it has
+        children (the combination buttons) it becomes a column beside the viewer on desktop and
+        stacks underneath on small screens.
       */}
       <section className={styles.hero}>
         <WinterScene />
