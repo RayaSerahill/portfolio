@@ -1,7 +1,4 @@
 # 🌙 Raya Serahill – Portfolio
-🧡🤍💖🤍🧡 *lesbian dev, cozy chaos & a little bit of pink* 🧡🤍💖🤍🧡
-
-![Lesbian Pride Flag](https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Orange_and_Pink_Lesbian_flag.svg/20px-Orange_and_Pink_Lesbian_flag.svg.png)
 
 ---
 
